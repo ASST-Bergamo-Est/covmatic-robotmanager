@@ -18,4 +18,10 @@ if __name__ == '__main__':
     logger.info("Starting version {}".format(__version__))
     robot = Robot(EVA_IP_ADDRESS, token, logger)
     robot.connect()
-    robot.test_gripper()
+    logger.info(robot.get_data())
+    robot.save_position("HOME2")
+    # robot.home()
+    # robot.print_data()
+    # robot.test_gripper()
+
+
