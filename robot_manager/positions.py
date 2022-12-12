@@ -21,15 +21,30 @@ class Positions:
 
         self._logger.info("Loaded positions: {}".format(self._positions))
 
+    def save(self, name, field, data):
+        self._logger.info("Saving position name {} field {} data {}".format(name, field, data))
+        if not name in self._positions:
+            self._logger.info("Creating position {}".format(name))
+            self._positions[name] = {}
+        self._positions[name][field] = data
+        self._save_positions()
+
+    def save_joints(self, name, data):
+        self.save(name, "joints", data)
+
+    def save_xyz(self, name, data):
+        self.save(name, "xyz", data)
+
     def get_position(self, name: str):
         self._logger.info("Requested position {}".format(name))
         if name in self._positions:
             return self._positions[name]
 
-    def save(self, forward_kinematics_pos, name):
-        self._logger.info("Saving position {} with name {}".format(forward_kinematics_pos, name))
-        self._positions[name] = forward_kinematics_pos
-        self._save_positions()
+    def get_joints(self, name):
+        return self.get_position(name)["joints"]
+
+    def get_xyz(self, name):
+        return self.get_position(name)["xyz"]
 
     def _save_positions(self):
         self._logger.info("Saving positions to file {}".format(self._abs_path))

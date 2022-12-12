@@ -17,11 +17,14 @@ logger = logging.getLogger(__name__)
 if __name__ == '__main__':
     logger.info("Starting version {}".format(__version__))
     robot = Robot(EVA_IP_ADDRESS, token, logger)
-    robot.connect()
-    logger.info(robot.get_data())
-    robot.save_position("HOME2")
-    # robot.home()
-    # robot.print_data()
-    # robot.test_gripper()
+    # Test code for movement
+    robot.move_to_position("HOME")
+    robot.close_gripper()
+    robot.open_gripper()
+
+    # Test code to save current position with a name
+    # robot.save_position("OT1-SLOT1")
+
+
 
 

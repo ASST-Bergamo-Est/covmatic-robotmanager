@@ -1,26 +1,30 @@
 import logging
 import time
 
+from robot_manager.EvaHelper import EvaHelper
+
 GRIPPER_HAS_PLATE_LOW_THRESHOLD = 1.0
 GRIPPER_HAS_PLATE_HIGH_THRESHOLD = 5.0
 
 
 class EvaGripper:
-    def __init__(self, eva, logger=logging.getLogger(__name__)):
-        self._eva = eva
+    def __init__(self, logger=logging.getLogger(__name__)):
+        self._eva = EvaHelper().eva
         self._logger = logger
 
     def open(self):
-        self._eva.gpio_set("ee_d0", False)
-        self._eva.gpio_set("ee_d1", True)
-        time.sleep(0.1)
-        self._eva.gpio_set("ee_d1", False)
+        with self._eva.lock():
+            self._eva.gpio_set("ee_d0", False)
+            self._eva.gpio_set("ee_d1", True)
+            time.sleep(0.1)
+            self._eva.gpio_set("ee_d1", False)
 
     def close(self):
-        self._eva.gpio_set("ee_d1", False)
-        self._eva.gpio_set("ee_d0", True)
-        time.sleep(0.1)
-        self._eva.gpio_set("ee_d0", False)
+        with self._eva.lock():
+            self._eva.gpio_set("ee_d1", False)
+            self._eva.gpio_set("ee_d0", True)
+            time.sleep(0.1)
+            self._eva.gpio_set("ee_d0", False)
 
     def has_plate(self) -> bool:
         for i in range(3):
