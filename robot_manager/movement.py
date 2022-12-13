@@ -7,7 +7,8 @@ from .positions import Positions
 from .EvaHelper import EvaHelper
 from .utils import *
 
-MAX_SPEED = 10
+MAX_SPEED = 0.25       # Max speed in m/s
+
 
 class Movement:
     def __init__(self, logger=logging.getLogger(__name__)):
@@ -50,8 +51,30 @@ class Movement:
 
         self._logger.info("Got joints: {}".format(joints))
 
-    def go_to_position(self, position_name):
+    def go_to_position(self, position_name, speed: float = None, offset: dict = None):
         self._logger.info("Going to position {}".format(position_name))
-        with self._eva.lock():
-            self._eva.control_go_to(self._positions.get_joints(position_name), max_speed=MAX_SPEED)
 
+        if not speed:
+            speed = MAX_SPEED
+
+        if offset:
+            joints = self.get_joints_from_updated_position(position_name, offset)
+        else:
+            joints = self._positions.get_joints(position_name)
+
+        self._eva_helper.check_data_emergency_stop()
+        with self._eva.lock():
+            self._eva.control_go_to(joints, max_speed=speed)
+
+    def get_joints_from_updated_position(self, name, offset: dict):
+        self._logger.info("Updating position {}".format(name))
+
+        joints = self._positions.get_joints(name)
+
+        for o in offset:
+            self._logger.info("Updating offset {} with value: {}".format(o, offset[o]))
+            self._logger.info("Old joints: {}".format(joints))
+
+            joints = self._eva.calc_nudge(joints, direction=o, offset=offset[o])
+            self._logger.info("New joints: {}".format(joints))
+        return joints

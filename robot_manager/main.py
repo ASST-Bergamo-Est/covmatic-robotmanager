@@ -19,7 +19,9 @@ if __name__ == '__main__':
     robot = Robot(EVA_IP_ADDRESS, token, logger)
     # Test code for movement
     robot.move_to_position("HOME")
+    robot.move_to_position("HOME", offset={"y": -0.1, "z": +0.1, "x": +0.1})
     robot.close_gripper()
+    robot.move_to_position("HOME")
     robot.open_gripper()
 
     # Test code to save current position with a name

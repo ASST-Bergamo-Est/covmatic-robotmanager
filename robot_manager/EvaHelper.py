@@ -8,6 +8,7 @@ class EvaHelper(Singleton):
     _eva = None
 
     def connect(self, eva_ip_address, token):
+        self._logger.info("Trying to connect to Eva ip {}...".format(eva_ip_address))
         self._eva = Eva(eva_ip_address, token)
         self._logger.info("Connected to Eva!")
 

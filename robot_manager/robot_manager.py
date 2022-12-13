@@ -49,20 +49,9 @@ class Robot:
             self._gripper.open()
             raise Exception("Plate not grabbed")
 
-    # def test_gripper(self):
-    #     self._logger.info("Trying to acquire lock")
-    #     with self._eva.lock():
-    #         self._logger.info("Lock acquired")
-    #         self.close_gripper()
-    #         self.check_gripper_has_plate()
-    #         time.sleep(1)
-    #         self.open_gripper()
-    #     self._logger.info("Lock released")
-
     def save_position(self, name: str):
         self._movement.save_position(name)
 
-    def move_to_position(self, name: str):
-        self._logger.info("Moving to position {}".format(name))
-        self._movement.go_to_position(name)
-
+    def move_to_position(self, name: str, speed: float = None, offset: dict = None):
+        self._logger.info("Moving to position {} with offset: {}".format(name, offset))
+        self._movement.go_to_position(name, speed, offset)
