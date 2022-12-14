@@ -82,6 +82,14 @@ class Movement:
             joints = self._positions.get_joints(position_name)
         return joints
 
+    def toolpath_load_and_execute(self, toolpath):
+        with self._eva.lock():
+            self._eva_helper.check_data_emergency_stop()
+            self._eva_helper.check_and_clear_errors()
+            self._eva.toolpaths_use(toolpath)
+            self._eva.control_home()
+            self._eva.control_run(loop=1)
+
     def test_toolpath(self):
         tp = Toolpath(max_speed=0.25)
         tp.add_waypoint("HOME", self.get_joints("HOME"))
@@ -91,14 +99,9 @@ class Movement:
         tp.add_movement("POINT1", "linear", max_speed=0.1)
         tp.add_movement("HOME", max_speed=0.1)
 
-        with self._eva.lock():
-            self._eva_helper.check_data_emergency_stop()
-            self._eva_helper.check_and_clear_errors()
-            self._eva.toolpaths_use(tp.toolpath)
-            self._eva.control_home()
-            self._eva.control_run(loop=1)
+        self.toolpath_load_and_execute(tp.toolpath)
 
-        # Test toolpath output
-        with open("test_toolpath.json", "w") as fp:
-            self._logger.info("{}".format(tp.toolpath))
-            json.dump(tp.toolpath, fp)
+        # # Test toolpath output
+        # with open("test_toolpath.json", "w") as fp:
+        #     self._logger.info("{}".format(tp.toolpath))
+        #     json.dump(tp.toolpath, fp)

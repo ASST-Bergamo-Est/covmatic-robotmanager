@@ -4,6 +4,9 @@ from .singleton import Singleton
 
 
 class EvaHelper(Singleton):
+    """ This is a singleton class that should help in interfacing
+        with Eva robot.
+    """
     _logger = logging.getLogger(__name__)
     _eva = None
 
@@ -34,7 +37,7 @@ class EvaHelper(Singleton):
         """ Check the robot data to know
             if the emergency button has been pressed
         """
-        if not data:
+        if data is None:
             data = self.get_data()
         if data['global']['estop']:
             raise Exception("Emergency stop pressed. Please release it.")
