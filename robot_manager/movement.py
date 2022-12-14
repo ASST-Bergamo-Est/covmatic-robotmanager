@@ -1,10 +1,11 @@
 # Movement class to manage approaching and moving of robot
-
+import json
 import logging
 from . import positions
 from . import gripper
 from .positions import Positions
 from .EvaHelper import EvaHelper
+from .toolpath import Toolpath
 from .utils import *
 
 MAX_SPEED = 0.25       # Max speed in m/s
@@ -78,3 +79,20 @@ class Movement:
             joints = self._eva.calc_nudge(joints, direction=o, offset=offset[o])
             self._logger.info("New joints: {}".format(joints))
         return joints
+
+    def test_toolpath(self):
+        tp = Toolpath(max_speed=0.1)
+        tp.add_waypoint(1, self._positions.get_joints("HOME"))
+        tp.add_waypoint(2, self.get_joints_from_updated_position("HOME", offset={"x": 0.3}))
+        tp.add_movement(1)
+        tp.add_movement(2, "linear")
+        tp.add_movement(1)
+
+        with self._eva.lock():
+            self._eva.toolpaths_use(tp.toolpath)
+            self._eva.control_run(loop=2)
+
+        # Test toolpath output
+        with open("test_toolpath.json", "w") as fp:
+            self._logger.info("{}".format(tp.toolpath))
+            json.dump(tp.toolpath, fp)

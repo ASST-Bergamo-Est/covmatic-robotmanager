@@ -11,9 +11,6 @@ from . import __version__
 from .EvaHelper import EvaHelper
 from .gripper import EvaGripper
 from .movement import Movement
-from .positions import Positions
-
-logger = logging.getLogger(__name__)
 
 
 class GripperStatus(Enum):
@@ -31,11 +28,11 @@ class Robot:
         self._movement = Movement()
 
     def open_gripper(self):
-        logger.info("Opening gripper")
+        self._logger.info("Opening gripper")
         self._gripper.open()
 
     def close_gripper(self):
-        logger.info("Closing gripper")
+        self._logger.info("Closing gripper")
         self._gripper.close()
 
     # def pick_up(self, position):
@@ -55,3 +52,6 @@ class Robot:
     def move_to_position(self, name: str, speed: float = None, offset: dict = None):
         self._logger.info("Moving to position {} with offset: {}".format(name, offset))
         self._movement.go_to_position(name, speed, offset)
+
+    def test_toolpath(self):
+        self._movement.test_toolpath()

@@ -17,14 +17,18 @@ logger = logging.getLogger(__name__)
 if __name__ == '__main__':
     logger.info("Starting version {}".format(__version__))
     robot = Robot(EVA_IP_ADDRESS, token, logger)
+
+    robot.test_toolpath()
+
     # Test code for movement
-    robot.move_to_position("HOME")
-    robot.move_to_position("HOME", offset={"y": -0.1, "z": +0.1, "x": +0.1})
-    robot.close_gripper()
-    robot.move_to_position("HOME")
-    robot.open_gripper()
+    # robot.move_to_position("HOME")
+    # robot.move_to_position("HOME", offset={"y": -0.1, "z": +0.1, "x": +0.1})
+    # robot.close_gripper()
+    # robot.move_to_position("HOME")
+    # robot.open_gripper()
 
     # Test code to save current position with a name
+    # First move the robot to the needed position, than run this instruction
     # robot.save_position("OT1-SLOT1")
 
 
