@@ -58,10 +58,7 @@ class Movement:
         if not speed:
             speed = MAX_SPEED
 
-        if offset:
-            joints = self.get_joints_from_updated_position(position_name, offset)
-        else:
-            joints = self._positions.get_joints(position_name)
+
 
         self._eva_helper.check_data_emergency_stop()
         with self._eva.lock():
@@ -78,6 +75,13 @@ class Movement:
 
             joints = self._eva.calc_nudge(joints, direction=o, offset=offset[o])
             self._logger.info("New joints: {}".format(joints))
+        return joints
+
+    def get_joints(self, position_name, offset: dict = None):
+        if offset:
+            joints = self.get_joints_from_updated_position(position_name, offset)
+        else:
+            joints = self._positions.get_joints(position_name)
         return joints
 
     def test_toolpath(self):
