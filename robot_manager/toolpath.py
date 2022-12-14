@@ -44,39 +44,57 @@ class Toolpath:
     def timeline(self):
         return self._timeline
 
-    def add_waypoint(self, label: str, joints: list):
+    def add_waypoint(self, label: str, joints: list, label_id: int = None):
+        labels_id = [w["label_id"] for w in self._waypoints]
+        labels_text = [w["label_text"] for w in self._waypoints]
+
+        if label_id is None:
+            label_id = max(labels_id, default=-1) + 1
+
+        if label_id in labels_id:
+            raise Exception("Label id {} for waypoint {} already present in list: {}".format(label_id, label, labels_id))
+
+        if label in labels_text:
+            raise Exception("Label text {} already present in list: {}".format(label, labels_text))
+
         self._waypoints.append({
-            "label_id": label,
+            "label_id": label_id,
+            "label_text": label,
             "joints": joints
         })
-        self._logger.info("Now waypoint contains: {}".format(self._waypoints))
+        self._logger.debug("Now waypoint contains: {}".format(self._waypoints))
 
     @property
     def _is_timeline_empty(self):
         return len(self._timeline) == 0
 
-    def add_movement(self, waypoint_label, trajectory: str = DEFAULT_TRAJECTORY):
+    def add_movement(self, label: str, trajectory: str = DEFAULT_TRAJECTORY, max_speed: float = None):
         if trajectory not in TRAJECTORIES:
             raise Exception("Trajectory {} not found in {}".format(trajectory, TRAJECTORIES))
 
         for i, w in enumerate(self._waypoints):
-            if w["label_id"] == waypoint_label:
+            if w["label_text"] == label:
                 waypoint = w
                 index = i
                 break
         else:
-            raise Exception("Waypoint label {} not found".format(waypoint_label))
+            raise Exception("Waypoint label {} not found".format(label))
 
-        self._logger.info("Found waypoint {} with index {}".format(waypoint, index))
+        self._logger.info("Adding waypoint {} with index {}".format(waypoint, index))
+
         if self._is_timeline_empty:
-            self._timeline.append({
+            to_append = {
                 "type": "home",
                 "waypoint_id": index
-            })
+            }
         else:
-            self._timeline.append({
+            to_append = {
                 "type": "trajectory",
                 "trajectory": trajectory,
-                "waypoint_id": index
-            })
-        self._logger.info("Timeline is {}".format(self._timeline))
+                "waypoint_id": index,
+            }
+            if max_speed:
+                to_append["max_speed"] = max_speed
+
+        self._timeline.append(to_append)
+        self._logger.debug("Timeline is {}".format(self._timeline))

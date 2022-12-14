@@ -58,11 +58,10 @@ class Movement:
         if not speed:
             speed = MAX_SPEED
 
-
-
         self._eva_helper.check_data_emergency_stop()
+
         with self._eva.lock():
-            self._eva.control_go_to(joints, max_speed=speed)
+            self._eva.control_go_to(self.get_joints(position_name), max_speed=speed)
 
     def get_joints_from_updated_position(self, name, offset: dict):
         self._logger.info("Updating position {}".format(name))
@@ -70,11 +69,10 @@ class Movement:
         joints = self._positions.get_joints(name)
 
         for o in offset:
-            self._logger.info("Updating offset {} with value: {}".format(o, offset[o]))
-            self._logger.info("Old joints: {}".format(joints))
-
+            self._logger.debug("Updating offset {} with value: {}".format(o, offset[o]))
+            self._logger.debug("Old joints: {}".format(joints))
             joints = self._eva.calc_nudge(joints, direction=o, offset=offset[o])
-            self._logger.info("New joints: {}".format(joints))
+            self._logger.debug("New joints: {}".format(joints))
         return joints
 
     def get_joints(self, position_name, offset: dict = None):
@@ -85,16 +83,20 @@ class Movement:
         return joints
 
     def test_toolpath(self):
-        tp = Toolpath(max_speed=0.1)
-        tp.add_waypoint(1, self._positions.get_joints("HOME"))
-        tp.add_waypoint(2, self.get_joints_from_updated_position("HOME", offset={"x": 0.3}))
-        tp.add_movement(1)
-        tp.add_movement(2, "linear")
-        tp.add_movement(1)
+        tp = Toolpath(max_speed=0.25)
+        tp.add_waypoint("HOME", self.get_joints("HOME"))
+        tp.add_waypoint("POINT1", self.get_joints("HOME", offset={"x": 0.3}))
+
+        tp.add_movement("HOME")
+        tp.add_movement("POINT1", "linear", max_speed=0.1)
+        tp.add_movement("HOME", max_speed=0.1)
 
         with self._eva.lock():
+            self._eva_helper.check_data_emergency_stop()
+            self._eva_helper.check_and_clear_errors()
             self._eva.toolpaths_use(tp.toolpath)
-            self._eva.control_run(loop=2)
+            self._eva.control_home()
+            self._eva.control_run(loop=1)
 
         # Test toolpath output
         with open("test_toolpath.json", "w") as fp:

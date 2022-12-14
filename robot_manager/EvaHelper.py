@@ -1,4 +1,4 @@
-from evasdk import Eva
+from evasdk import Eva, EvaError
 import logging
 from .singleton import Singleton
 
@@ -31,7 +31,21 @@ class EvaHelper(Singleton):
             self._logger.info("{}: {}".format(d, data[d]))
 
     def check_data_emergency_stop(self, data=None):
+        """ Check the robot data to know
+            if the emergency button has been pressed
+        """
         if not data:
             data = self.get_data()
         if data['global']['estop']:
             raise Exception("Emergency stop pressed. Please release it.")
+
+    def check_and_clear_errors(self):
+        """ Check for hard error and try to reset them.
+            Must have lock.
+        """
+        try:
+            self._eva.control_wait_for_ready()
+        except EvaError as e:
+            self._logger.info("Found robot in error state: {}. Trying to reset".format(e))
+            self._eva.control_reset_errors()
+            self._eva.control_wait_for_ready()
