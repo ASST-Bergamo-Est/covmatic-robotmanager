@@ -93,11 +93,14 @@ class Movement:
     def test_toolpath(self):
         tp = Toolpath(max_speed=0.25)
         tp.add_waypoint("HOME", self.get_joints("HOME"))
-        tp.add_waypoint("POINT1", self.get_joints("HOME", offset={"x": 0.3}))
+        tp.add_waypoint("OT1-SLOT1", self.get_joints("OT1-SLOT1", offset={'z': -0.1}))
+        tp.add_waypoint("OT1.1-SLOT1.1", self.get_joints("OT1-SLOT1"))
 
         tp.add_movement("HOME")
-        tp.add_movement("POINT1", "linear", max_speed=0.1)
-        tp.add_movement("HOME", max_speed=0.1)
+        tp.add_movement("OT1-SLOT1", max_speed=0.1)
+        tp.add_movement("OT1.1-SLOT1.1", 'linear', max_speed=0.05)
+        tp.add_movement("OT1-SLOT1", 'linear', max_speed=0.1)
+        tp.add_movement("HOME")
 
         self.toolpath_load_and_execute(tp.toolpath)
 
