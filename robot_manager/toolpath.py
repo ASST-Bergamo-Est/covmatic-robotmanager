@@ -34,8 +34,12 @@ class Toolpath:
                     "o0": "voltage",
                     "o1": "voltage"
                 },
-                "next_label_id": 3
+                "next_label_id": self.next_label_id
             }
+
+    @property
+    def next_label_id(self) -> int:
+        return max(self.labels_id, default=-1) + 1
 
     @property
     def waypoints(self):
@@ -45,14 +49,17 @@ class Toolpath:
     def timeline(self):
         return self._timeline
 
+    @property
+    def labels_id(self) -> list:
+        return [w["label_id"] for w in self._waypoints]
+
     def add_waypoint(self, label: str, joints: list, label_id: int = None):
-        labels_id = [w["label_id"] for w in self._waypoints]
         labels_text = [w["label_text"] for w in self._waypoints]
 
         if label_id is None:
-            label_id = max(labels_id, default=-1) + 1
+            label_id = self.next_label_id
 
-        if label_id in labels_id:
+        if label_id in self.labels_id:
             raise Exception("Label id {} for waypoint {} already present in list: {}".format(label_id, label, labels_id))
 
         if label in labels_text:
