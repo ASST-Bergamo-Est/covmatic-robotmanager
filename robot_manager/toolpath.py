@@ -11,7 +11,7 @@ class Toolpath:
         self._max_speed = max_speed
         self._toolpath = {}
         self._waypoints = []
-        self._timeline = []
+        self.clear_movements()
         self._logger = logging.getLogger(__name__)
 
     @property
@@ -106,3 +106,6 @@ class Toolpath:
 
         self._timeline.append(to_append)
         self._logger.debug("Timeline is {}".format(self._timeline))
+
+    def clear_movements(self):
+        self._timeline = []

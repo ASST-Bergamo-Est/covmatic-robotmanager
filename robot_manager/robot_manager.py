@@ -56,7 +56,7 @@ class Robot:
         self._logger.info("Moving to position {} with offset: {}".format(name, offset))
         self._movement.go_to_position(name, speed, offset)
 
-    def test_toolpath(self):
+    def test_pick_up(self):
         position_name = "OT1-SLOT1"
 
         for i in range(10):
@@ -72,3 +72,5 @@ class Robot:
 
             self._gripper.open()
 
+    def test_toolpath(self):
+        self._movement.test_toolpath()

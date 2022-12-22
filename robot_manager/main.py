@@ -34,19 +34,19 @@ robot = Robot(EVA_IP_ADDRESS, token, logger)
 
 
 if __name__ == '__main__':
-    # robot.test_toolpath()
+    robot.test_toolpath()
     # robot.unlock()
 
     # Test code for movement
-    robot.move_to_position("HOME")
-    robot.move_to_position("HOME", offset={"y": -0.1, "z": +0.1, "x": +0.1})
-    robot.close_gripper()
-    robot.move_to_position("HOME")
-    robot.open_gripper()
+    # robot.move_to_position("HOME")
+    # robot.move_to_position("HOME", offset={"y": -0.1, "z": +0.1, "x": +0.1})
+    # robot.close_gripper()
+    # robot.move_to_position("HOME")
+    # robot.open_gripper()
 
     # Test code to save current position with a name
     # First move the robot to the needed position, than run this instruction
-    # robot.save_position("OT1-SLOT1")
+    # robot.save_position("OT1-SLOT2")
 
 
 
