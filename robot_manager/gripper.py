@@ -27,6 +27,7 @@ class EvaGripper:
             self._eva.gpio_set("ee_d0", False)
 
     def has_plate(self) -> bool:
+        self._logger.info("Checking gripper has plate")
         for i in range(3):
             gripper_analog_feedback = self._eva.data_snapshot()['global.inputs']['ee_a0']
             self._logger.info("Gripper analog feedback: {}".format(gripper_analog_feedback))

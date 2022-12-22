@@ -5,6 +5,7 @@ MAX_SPEED = 0.25  # Default max speed
 TRAJECTORIES = ["joint_space", "linear", "spline"]
 DEFAULT_TRAJECTORY = "joint_space"
 
+
 class Toolpath:
     def __init__(self, max_speed=MAX_SPEED):
         self._max_speed = max_speed

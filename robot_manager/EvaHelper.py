@@ -1,5 +1,7 @@
 from evasdk import Eva, EvaError
 import logging
+
+from .EvaLockThread import EvaLockThread, EvaLockManager
 from .singleton import Singleton
 
 
@@ -9,11 +11,18 @@ class EvaHelper(Singleton):
     """
     _logger = logging.getLogger(__name__)
     _eva = None
+    _eva_lock_manager = None
 
     def connect(self, eva_ip_address, token):
         self._logger.info("Trying to connect to Eva ip {}...".format(eva_ip_address))
         self._eva = Eva(eva_ip_address, token)
         self._logger.info("Connected to Eva!")
+        self._eva_lock_manager = EvaLockManager(self._eva)
+        # self._eva_lock_manager.start_locking()
+
+    def disconnect(self):
+        self._logger.info("Disconnecting from Eva!")
+        # self._eva_lock_manager.stop_locking()
 
     @property
     def eva(self):
@@ -52,3 +61,5 @@ class EvaHelper(Singleton):
             self._logger.info("Found robot in error state: {}. Trying to reset".format(e))
             self._eva.control_reset_errors()
             self._eva.control_wait_for_ready()
+
+

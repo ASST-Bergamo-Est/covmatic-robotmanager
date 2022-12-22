@@ -27,6 +27,9 @@ class Robot:
         self._gripper = EvaGripper()
         self._movement = Movement()
 
+    def unlock(self):
+        self._eva_helper.disconnect()
+
     def open_gripper(self):
         self._logger.info("Opening gripper")
         self._gripper.open()
@@ -54,4 +57,18 @@ class Robot:
         self._movement.go_to_position(name, speed, offset)
 
     def test_toolpath(self):
-        self._movement.test_toolpath()
+        position_name = "OT1-SLOT1"
+
+        for i in range(10):
+            self._movement.approach_linear(position_name)
+
+            self._gripper.close()
+
+            if not self._gripper.has_plate():
+                self._gripper.open()
+                raise Exception("Plate not grabbed")
+
+            self._movement.raise_vertically(0.005)
+
+            self._gripper.open()
+

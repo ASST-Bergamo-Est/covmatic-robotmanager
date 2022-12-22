@@ -61,7 +61,7 @@ class Movement:
         self._eva_helper.check_data_emergency_stop()
 
         with self._eva.lock():
-            self._eva.control_go_to(self.get_joints(position_name), max_speed=speed)
+            self._eva.control_go_to(self.get_joints(position_name, offset=offset), max_speed=speed)
 
     def get_joints_from_updated_position(self, name, offset: dict):
         self._logger.info("Updating position {}".format(name))
@@ -86,9 +86,16 @@ class Movement:
         with self._eva.lock():
             self._eva_helper.check_data_emergency_stop()
             self._eva_helper.check_and_clear_errors()
+
+            self._logger.info("Saving toolpath")
             self._eva.toolpaths_use(toolpath)
+
+            self._logger.info("Going to home")
             self._eva.control_home()
+
+            self._logger.info("Running toolpath...")
             self._eva.control_run(loop=1)
+            self._logger.info("Finished")
 
     def test_toolpath(self):
         tp = Toolpath(max_speed=0.25)
@@ -97,14 +104,63 @@ class Movement:
         tp.add_waypoint("OT1.1-SLOT1.1", self.get_joints("OT1-SLOT1"))
 
         tp.add_movement("HOME")
-        tp.add_movement("OT1-SLOT1", max_speed=0.1)
         tp.add_movement("OT1.1-SLOT1.1", 'linear', max_speed=0.05)
         tp.add_movement("OT1-SLOT1", 'linear', max_speed=0.1)
         tp.add_movement("HOME")
 
         self.toolpath_load_and_execute(tp.toolpath)
 
-        # # Test toolpath output
-        # with open("test_toolpath.json", "w") as fp:
-        #     self._logger.info("{}".format(tp.toolpath))
-        #     json.dump(tp.toolpath, fp)
+    def move_list(self, data: list):
+        self._logger.info("Move list called with: {}".format(data))
+
+        arguments_to_copy = ["trajectory", "max_speed"]
+
+        tp = Toolpath()
+
+        for i, d in enumerate(data):
+            if not "joints" in d:
+                raise Exception("Mandatory \'joints\' key not found in {}".format(d))
+
+            waypoint_label = "WP_{}".format(i)
+            tp.add_waypoint(waypoint_label, d["joints"])
+
+            arguments = {"label": waypoint_label}
+
+            for a in arguments_to_copy:
+                self._logger.debug("Checking argument {}".format(a))
+                if a in d:
+                    arguments[a] = d[a]
+            self._logger.debug("Arguments now are: {}".format(arguments))
+
+            tp.add_movement(**arguments)
+
+        self.toolpath_load_and_execute(tp.toolpath)
+
+    def approach_linear(self, position_name, start_height=0.1,  max_speed=0.05):
+        """ Approach in a linear way to a defined position
+            :param position_name: the name of the target position
+            :param start_height: the height above the position at which start the linear phase
+            :param max_speed: the maximum speed at which move in the linear phase
+        """
+
+        position = self.get_joints(position_name)
+        position_above = self.get_joints(position_name, offset={"z": -start_height})
+
+        moves = [{"joints": position_above},
+                 {"joints": position, "trajectory": "linear", "max_speed": max_speed}]
+
+        self.move_list(moves)
+
+    def raise_vertically(self, height, max_speed=0.05):
+        current_pos = self.get_angles()
+        updated_pos = self._eva.calc_nudge(current_pos, "z", -height)
+
+        moves = [{"joints": current_pos},
+                 {"joints": updated_pos, "trajectory": "linear", "max_speed": max_speed}]
+
+        self.move_list(moves)
+
+    # # Test toolpath output
+    # with open("test_toolpath.json", "w") as fp:
+    #     self._logger.info("{}".format(tp.toolpath))
+    #     json.dump(tp.toolpath, fp)
