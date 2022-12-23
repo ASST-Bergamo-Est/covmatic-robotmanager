@@ -4,10 +4,10 @@ import logging
 import time
 
 from . import positions
-from . import gripper
+from .gripper import EvaGripper
 from .positions import Positions
 from .EvaHelper import EvaHelper
-from .toolpath import Toolpath
+from .toolpath import Toolpath, ToolpathExecute
 from .utils import *
 
 MAX_SPEED = 0.25       # Max speed in m/s
@@ -84,87 +84,52 @@ class Movement:
             joints = self._positions.get_joints(position_name)
         return joints
 
-    def toolpath_load_and_execute(self, toolpath):
-        with self._eva.lock():
-            self._eva_helper.check_data_emergency_stop()
-            self._eva_helper.check_and_clear_errors()
+    def transfer_plate(self, source_pos, dest_pos, home_pos = "HOME"):
 
-            self._logger.info("Saving toolpath")
-            self._eva.toolpaths_use(toolpath)
-
-            self._logger.info("Going to home")
-            self._eva.control_home()
-
-            self._logger.info("Running toolpath...")
-            self._eva.control_run(loop=1)
-            self._logger.info("Finished")
-
-    def test_toolpath(self):
-
-        from .gripper import EvaGripper
         gripper = EvaGripper()
 
-        offset_dict = {
-            'z': -0.1,
-            'y': -0.147,
-            'x': 0.0045
-        }
+        raising_height = -0.1
+        near_height = -0.01
+        grip_height = 0.005
 
-        tp1 = Toolpath(max_speed=0.25)
+        approach_speed = 0.025
 
-        # tp.add_waypoint("HOME2", self.get_joints("HOME", offset=offset_dict))
-        pos_up = self.get_joints("OT1-SLOT1", offset=offset_dict)
-        pos_down = self._eva.calc_nudge(pos_up, "z", 0.108)
+        tp = Toolpath(max_speed=0.25)
+        tp.add_waypoint("HOME", self.get_joints(home_pos))
+        tp.add_waypoint("pick_pos_up", self.get_joints(source_pos, offset={"z": raising_height}))
+        tp.add_waypoint("pick_pos_near", self.get_joints(source_pos, offset={"z": near_height}))
+        tp.add_waypoint("pick_pos",  self.get_joints(source_pos, offset={"z": grip_height}))
 
-        tp1.add_waypoint("HOME", self.get_joints("HOME"))
-        tp1.add_waypoint("OT1-SLOT1-UP", self.get_joints("OT1-SLOT1", offset={'z': -0.1}))
-        tp1.add_waypoint("OT1-SLOT2-UP", pos_up)
-        tp1.add_waypoint("OT1-SLOT2-down", pos_down)
-        tp1.add_waypoint("OT1-SLOT1", self.get_joints("OT1-SLOT1", offset={'z': 0.003}))
+        tp.add_waypoint("drop_pos_up", self.get_joints(dest_pos, offset={"z": raising_height}))
+        tp.add_waypoint("drop_pos_near", self.get_joints(dest_pos, offset={"z": near_height}))
+        tp.add_waypoint("drop_pos", self.get_joints(dest_pos, offset={"z": grip_height}))
 
-        tp1.add_movement("HOME")
         gripper.open()
-        # tp.add_movement("HOME2")
-        tp1.add_movement("OT1-SLOT1-UP", max_speed=0.1)
-        # time.sleep(1)
-        tp1.add_movement("OT1-SLOT1", "linear", max_speed=0.1)
-        self.toolpath_load_and_execute(tp1.toolpath)
+        with ToolpathExecute(tp):
+            tp.add_movement("pick_pos_up")
+            tp.add_movement("pick_pos_near", "linear")
+            tp.add_movement("pick_pos", "linear", max_speed=approach_speed)
 
         gripper.close()
-        tp1.clear_movements()
-        tp1.add_movement("OT1-SLOT1", "linear", max_speed=0.1)
-        tp1.add_movement("OT1-SLOT1-UP", "linear", max_speed=0.05)
-        tp1.add_movement("OT1-SLOT2-UP", "linear", max_speed=0.05)
-        tp1.add_movement("OT1-SLOT2-down", "linear", max_speed=0.05)
+        if not gripper.has_plate():
+            raise Exception("Plate not grabbed!")
 
-        self.toolpath_load_and_execute(tp1.toolpath)
+        with ToolpathExecute(tp):
+            tp.add_movement("pick_pos")
+            tp.add_movement("pick_pos_near", "linear", max_speed=approach_speed)
+            tp.add_movement("pick_pos_up", "linear")
+
+            tp.add_movement("drop_pos_up")
+            tp.add_movement("drop_pos_near", "linear")
+            tp.add_movement("drop_pos", "linear", max_speed=approach_speed)
+
         gripper.open()
 
-        tp1.clear_movements()
-        tp1.add_movement("OT1-SLOT2-down", "linear", max_speed=0.05)
-        tp1.add_movement("OT1-SLOT2-UP", "linear", max_speed=0.05)
-        tp1.add_movement("HOME")
-
-        self.toolpath_load_and_execute(tp1.toolpath)
-
-        tp1.clear_movements()
-        tp1.add_movement("OT1-SLOT2-UP", "linear", max_speed=0.05)
-        tp1.add_movement("OT1-SLOT2-down", "linear", max_speed=0.05)
-        self.toolpath_load_and_execute(tp1.toolpath)
-        gripper.close()
-
-        tp1.clear_movements()
-
-        tp1.add_movement("OT1-SLOT2-down", "linear", max_speed=0.05)
-        tp1.add_movement("OT1-SLOT2-UP", "linear", max_speed=0.05)
-        tp1.add_movement("OT1-SLOT1-UP", "linear", max_speed=0.05)
-        tp1.add_movement("OT1-SLOT1", "linear", max_speed=0.05)
-        self.toolpath_load_and_execute(tp1.toolpath)
-        gripper.open()
-
-        tp1.add_movement("OT1-SLOT1-UP", max_speed=0.1)
-        tp1.add_movement("HOME")
-        self.toolpath_load_and_execute(tp1.toolpath)
+        with ToolpathExecute(tp):
+            tp.add_movement("drop_pos")
+            tp.add_movement("drop_pos_near", "linear", max_speed=approach_speed)
+            tp.add_movement("drop_pos_up", "linear")
+            tp.add_movement("HOME")
 
     def move_list(self, data: list):
         self._logger.info("Move list called with: {}".format(data))

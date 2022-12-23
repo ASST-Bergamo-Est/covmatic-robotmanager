@@ -74,3 +74,6 @@ class Robot:
 
     def test_toolpath(self):
         self._movement.test_toolpath()
+
+    def transfer_plate(self, source_pos, dest_pos, home_pos="HOME"):
+        self._movement.transfer_plate(source_pos, dest_pos, home_pos)

@@ -34,7 +34,10 @@ robot = Robot(EVA_IP_ADDRESS, token, logger)
 
 
 if __name__ == '__main__':
-    robot.test_toolpath()
+    for i in range(1):
+        robot.transfer_plate("SLOT1", "SLOT2", "HOME-SLOT12")
+        robot.transfer_plate("SLOT2", "SLOT1", "HOME-SLOT12")
+
     # robot.unlock()
 
     # Test code for movement
@@ -46,7 +49,7 @@ if __name__ == '__main__':
 
     # Test code to save current position with a name
     # First move the robot to the needed position, than run this instruction
-    # robot.save_position("OT1-SLOT2")
+    # robot.save_position("HOME-SLOT12")
 
 
 
