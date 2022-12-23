@@ -1,8 +1,10 @@
 import logging
 
+from .EvaHelper import EvaHelper
+
 MAX_SPEED = 0.25  # Default max speed
 
-TRAJECTORIES = ["joint_space", "linear", "spline"]
+TRAJECTORIES = ["joint_space", "linear", "pass-through"]
 DEFAULT_TRAJECTORY = "joint_space"
 
 
@@ -10,6 +12,7 @@ class Toolpath:
     def __init__(self, max_speed=MAX_SPEED):
         self._max_speed = max_speed
         self._toolpath = {}
+        self._timeline = []
         self._waypoints = []
         self.clear_movements()
         self._logger = logging.getLogger(__name__)
@@ -91,6 +94,7 @@ class Toolpath:
         self._logger.info("Adding waypoint {} with index {}".format(waypoint, index))
 
         if self._is_timeline_empty:
+            self._logger.info("Timeline is empty!!")
             to_append = {
                 "type": "home",
                 "waypoint_id": index
@@ -98,14 +102,50 @@ class Toolpath:
         else:
             to_append = {
                 "type": "trajectory",
-                "trajectory": trajectory,
-                "waypoint_id": index,
+                "waypoint_id": index
             }
+
+            if trajectory == "pass-through":
+                to_append["pass_through"] = True
+            elif len(self._timeline) > 0 and self._timeline[-1].get("pass_through", False):
+                to_append["trajectory"] = "spline"
+            else:
+                to_append["trajectory"] = trajectory
             if max_speed:
                 to_append["max_speed"] = max_speed
 
+        self._logger.info("Appending {}".format(to_append))
         self._timeline.append(to_append)
         self._logger.debug("Timeline is {}".format(self._timeline))
 
     def clear_movements(self):
         self._timeline = []
+
+
+class ToolpathExecute:
+    def __init__(self, tp: Toolpath, logger=logging.getLogger(__name__)):
+        self._eh = EvaHelper()
+        self._tp = tp
+        self._logger = logger
+
+    def __enter__(self) -> Toolpath:
+        self._tp.clear_movements()
+        return self._tp
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.toolpath_load_and_execute()
+
+    def toolpath_load_and_execute(self):
+        with self._eh.eva.lock():
+            self._eh.check_data_emergency_stop()
+            self._eh.check_and_clear_errors()
+
+            self._logger.info("Saving toolpath: {}".format(self._tp.toolpath))
+            self._eh.eva.toolpaths_use(self._tp.toolpath)
+
+            self._logger.info("Going to home")
+            self._eh.eva.control_home()
+
+            self._logger.info("Running toolpath...")
+            self._eh.eva.control_run(loop=1)
+            self._logger.info("Finished")
