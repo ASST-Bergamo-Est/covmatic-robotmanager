@@ -4,6 +4,7 @@
 
 import logging
 import signal
+import time
 
 from .robot_manager import Robot
 from . import __version__
@@ -34,9 +35,33 @@ robot = Robot(EVA_IP_ADDRESS, token, logger)
 
 
 if __name__ == '__main__':
-    for i in range(1):
-        robot.transfer_plate("SLOT1", "SLOT2", "HOME-SLOT12")
-        robot.transfer_plate("SLOT2", "SLOT1", "HOME-SLOT12")
+    max_speed = 0.25
+    plate_order = ["OT1-SLOT1", "OT2-SLOT1", "OT1-SLOT1", "OT1-SLOT3", "OT1-SLOT2", "OT1-SLOT4", "OT1-SLOT11"]
+
+    for j in range(10):
+        print("Cycle {}".format(j+1))
+        for i, _ in enumerate(plate_order):
+            dest_plate = plate_order[i]
+            pick_plate = plate_order[i-1]
+
+            print("Transferring from {} to {}".format(pick_plate, dest_plate))
+            robot.transfer_plate(pick_plate, dest_plate, max_speed=max_speed)
+            print("waiting...")
+            time.sleep(2)
+
+    # for i in range(10):
+    #
+    #     robot.transfer_plate("OT2-SLOT1", "OT1-SLOT1", max_speed=max_speed)
+    #     robot.transfer_plate("OT1-SLOT1", "OT1-SLOT3", max_speed=max_speed)
+    #     robot.transfer_plate("OT1-SLOT3", "OT1-SLOT2", max_speed=max_speed)
+    #     robot.transfer_plate("OT1-SLOT2", "OT1-SLOT4", max_speed=max_speed)
+    #     robot.transfer_plate("OT1-SLOT4", "OT1-SLOT1", max_speed=max_speed)
+    #     time.sleep(2)
+
+    # robot.transfer_plate("OT1-SLOT2", "OT1-SLOT1", "OT1-HOME", max_speed=0.1)
+
+    #     print("Waiting for cycle {}".format(i+1))
+    #     time.sleep(2)
 
     # robot.unlock()
 
@@ -49,7 +74,7 @@ if __name__ == '__main__':
 
     # Test code to save current position with a name
     # First move the robot to the needed position, than run this instruction
-    # robot.save_position("HOME-SLOT12")
+    # robot.save_position("OT1-SLOT1")
 
 
 

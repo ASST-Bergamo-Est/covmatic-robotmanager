@@ -39,6 +39,7 @@ class Positions:
         self._logger.info("Requested position {}".format(name))
         if name in self._positions:
             return self._positions[name]
+        raise Exception("Position {} not found.".format(name))
 
     def get_joints(self, name):
         return self.get_position(name)["joints"]
@@ -50,3 +51,7 @@ class Positions:
         self._logger.info("Saving positions to file {}".format(self._abs_path))
         with open(self._abs_path, "w") as fp:
             json.dump(self._positions, fp)
+
+    @staticmethod
+    def get_pos_owner(name: str):
+        return name.split("-")[0]

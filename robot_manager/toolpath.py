@@ -10,7 +10,7 @@ DEFAULT_TRAJECTORY = "joint_space"
 
 class Toolpath:
     def __init__(self, max_speed=MAX_SPEED):
-        self._max_speed = max_speed
+        self._max_speed = max_speed or MAX_SPEED
         self._toolpath = {}
         self._timeline = []
         self._waypoints = []

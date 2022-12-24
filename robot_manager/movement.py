@@ -84,30 +84,72 @@ class Movement:
             joints = self._positions.get_joints(position_name)
         return joints
 
-    def transfer_plate(self, source_pos, dest_pos, home_pos = "HOME"):
+    def get_raising_height(self, pos: str):
+
+        owner = self._positions.get_pos_owner(pos)
+
+        max_labware_height_from_deck = 0.17
+
+        max_z = self._positions.get_xyz("{}-HMAX".format(owner))["position"]["z"]
+        deck_z = self._positions.get_xyz("{}-DECK".format(owner))["position"]["z"]
+        self._logger.info("Deck Z for object {} is {}. Max z is {}".format(owner, deck_z, max_z))
+
+        z_to_reach = deck_z + max_labware_height_from_deck
+        self._logger.info("Z to reach {}".format(z_to_reach))
+
+        pos_z = self._positions.get_xyz("{}".format(pos))["position"]["z"]
+        raising_height = -(z_to_reach - pos_z)     # Changed sign since with normal orientaion positive it toward bottom
+
+        self._logger.info("We've to raise of {}".format(raising_height))
+        return raising_height
+
+    def transfer_plate(self, source_pos, dest_pos, max_speed=None):
 
         gripper = EvaGripper()
 
-        raising_height = -0.1
         near_height = -0.01
-        grip_height = 0.005
+        grip_height = 0.008
+
+        source_raising_height = self.get_raising_height(source_pos)
+        dest_raising_height = self.get_raising_height(dest_pos)
+
+        source_owner = self._positions.get_pos_owner(source_pos)
+        dest_owner = self._positions.get_pos_owner(dest_pos)
+        is_different_owner = source_owner != dest_owner
+
+        self._logger.info("Source owner {}; dest owner {}; are different: {}".format(source_owner, dest_owner, is_different_owner))
+        source_home_pos = self.get_joints("{}-HOME".format(source_owner))
+        dest_home_pos = self.get_joints("{}-HOME".format(dest_owner))
 
         approach_speed = 0.025
 
-        tp = Toolpath(max_speed=0.25)
-        tp.add_waypoint("HOME", self.get_joints(home_pos))
-        tp.add_waypoint("pick_pos_up", self.get_joints(source_pos, offset={"z": raising_height}))
+        self._eva_helper.check_data_emergency_stop()
+
+        with self._eva.lock():
+            self._eva_helper.check_and_clear_errors()
+
+        tp = Toolpath(max_speed=max_speed)
+        tp.add_waypoint("pick_home", source_home_pos)
+        tp.add_waypoint("pick_pos_up", self.get_joints(source_pos, offset={"z": source_raising_height}))
         tp.add_waypoint("pick_pos_near", self.get_joints(source_pos, offset={"z": near_height}))
         tp.add_waypoint("pick_pos",  self.get_joints(source_pos, offset={"z": grip_height}))
 
-        tp.add_waypoint("drop_pos_up", self.get_joints(dest_pos, offset={"z": raising_height}))
+        tp.add_waypoint("drop_home", dest_home_pos)
+        tp.add_waypoint("drop_pos_up", self.get_joints(dest_pos, offset={"z": dest_raising_height}))
         tp.add_waypoint("drop_pos_near", self.get_joints(dest_pos, offset={"z": near_height}))
         tp.add_waypoint("drop_pos", self.get_joints(dest_pos, offset={"z": grip_height}))
 
-        gripper.open()
+        gripper.close()
+
         with ToolpathExecute(tp):
+            tp.add_movement("pick_home")
             tp.add_movement("pick_pos_up")
             tp.add_movement("pick_pos_near", "linear")
+
+        gripper.open()
+
+        with ToolpathExecute(tp):
+            tp.add_movement("pick_pos_near")
             tp.add_movement("pick_pos", "linear", max_speed=approach_speed)
 
         gripper.close()
@@ -119,6 +161,10 @@ class Movement:
             tp.add_movement("pick_pos_near", "linear", max_speed=approach_speed)
             tp.add_movement("pick_pos_up", "linear")
 
+            if is_different_owner:
+                tp.add_movement("pick_home")
+                tp.add_movement("drop_home")
+
             tp.add_movement("drop_pos_up")
             tp.add_movement("drop_pos_near", "linear")
             tp.add_movement("drop_pos", "linear", max_speed=approach_speed)
@@ -128,8 +174,13 @@ class Movement:
         with ToolpathExecute(tp):
             tp.add_movement("drop_pos")
             tp.add_movement("drop_pos_near", "linear", max_speed=approach_speed)
+
+        gripper.close()
+
+        with ToolpathExecute(tp):
+            tp.add_movement("drop_pos_near")
             tp.add_movement("drop_pos_up", "linear")
-            tp.add_movement("HOME")
+            tp.add_movement("drop_home")
 
     def move_list(self, data: list):
         self._logger.info("Move list called with: {}".format(data))

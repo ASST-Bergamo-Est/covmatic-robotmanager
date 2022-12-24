@@ -75,5 +75,16 @@ class Robot:
     def test_toolpath(self):
         self._movement.test_toolpath()
 
-    def transfer_plate(self, source_pos, dest_pos, home_pos="HOME"):
-        self._movement.transfer_plate(source_pos, dest_pos, home_pos)
+    def transfer_plate(self, source_pos, dest_pos, max_speed=None):
+        self._movement.transfer_plate(source_pos, dest_pos, max_speed)
+
+    def lock_for_seconds(self, seconds=10):
+        # DEBUG ONLY, to be substituted with something else
+        self._logger.info("Locking robot")
+        with self._eva_helper.eva.lock():
+            self._eva_helper.check_and_clear_errors()
+            time.sleep(seconds)
+        self._logger.info("Robot unlocked")
+
+    def get_state(self):
+        return self._eva_helper.eva.data_snapshot()
