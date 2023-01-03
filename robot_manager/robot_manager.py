@@ -24,8 +24,10 @@ class Robot:
         self._logger = logger
         self._eva_helper = EvaHelper()
         self._eva_helper.connect(eva_ip_address, token)
-        self._gripper = EvaGripper()
         self._movement = Movement()
+        self._pickup_pos = None
+        self._drop_pos = None
+        self._plate = None
 
     def unlock(self):
         self._eva_helper.disconnect()
@@ -40,3 +42,8 @@ class Robot:
     def transfer_plate(self, source_pos, dest_pos, max_speed=None, detach_plate=False):
         self._movement.transfer_plate(source_pos, dest_pos, max_speed, detach_plate=detach_plate)
 
+    def set_pickup_position(self, position, plate_name):
+        pass
+
+    # def _check_and_set_plate_name(self, plate_name):
+    #     if not self._plate:
