@@ -49,8 +49,8 @@ class Robot:
             self._gripper.open()
             raise Exception("Plate not grabbed")
 
-    def save_position(self, name: str):
-        self._movement.save_position(name)
+    def save_position(self, name: str, joints=None):
+        self._movement.save_position(name, joints)
 
     def move_to_position(self, name: str, speed: float = None, offset: dict = None):
         self._logger.info("Moving to position {} with offset: {}".format(name, offset))
@@ -75,8 +75,8 @@ class Robot:
     def test_toolpath(self):
         self._movement.test_toolpath()
 
-    def transfer_plate(self, source_pos, dest_pos, max_speed=None):
-        self._movement.transfer_plate(source_pos, dest_pos, max_speed)
+    def transfer_plate(self, source_pos, dest_pos, max_speed=None, detach_plate=False):
+        self._movement.transfer_plate(source_pos, dest_pos, max_speed, detach_plate=detach_plate)
 
     def lock_for_seconds(self, seconds=10):
         # DEBUG ONLY, to be substituted with something else

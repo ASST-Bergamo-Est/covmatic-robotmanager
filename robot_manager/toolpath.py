@@ -1,6 +1,7 @@
 import logging
 
 from .EvaHelper import EvaHelper
+from contextlib import nullcontext
 
 MAX_SPEED = 0.25  # Default max speed
 
@@ -136,7 +137,7 @@ class ToolpathExecute:
         self.toolpath_load_and_execute()
 
     def toolpath_load_and_execute(self):
-        with self._eh.eva.lock():
+        with self._eh.eva.lock() if not self._eh.is_locked() else nullcontext():
             self._eh.check_data_emergency_stop()
             self._eh.check_and_clear_errors()
 

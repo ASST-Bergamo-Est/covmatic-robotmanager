@@ -62,4 +62,8 @@ class EvaHelper(Singleton):
             self._eva.control_reset_errors()
             self._eva.control_wait_for_ready()
 
+    def is_locked(self) -> bool:
+        locked = self._eva.lock_status() == {"owner": "you", "status": "locked"}
+        self._logger.info("Eva locked: {}".format(locked))
+        return locked
 

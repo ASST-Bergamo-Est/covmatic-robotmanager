@@ -34,20 +34,36 @@ robot = Robot(EVA_IP_ADDRESS, token, logger)
 # signal.signal(signal.SIGABRT, handler)
 
 
-if __name__ == '__main__':
+def test_cycle():
     max_speed = 0.25
     plate_order = ["OT1-SLOT1", "OT2-SLOT1", "OT1-SLOT1", "OT1-SLOT3", "OT1-SLOT2", "OT1-SLOT4", "OT1-SLOT11"]
 
     for j in range(10):
-        print("Cycle {}".format(j+1))
+        print("Cycle {}".format(j + 1))
         for i, _ in enumerate(plate_order):
             dest_plate = plate_order[i]
-            pick_plate = plate_order[i-1]
+            pick_plate = plate_order[i - 1]
 
             print("Transferring from {} to {}".format(pick_plate, dest_plate))
             robot.transfer_plate(pick_plate, dest_plate, max_speed=max_speed)
             print("waiting...")
             time.sleep(2)
+
+
+if __name__ == '__main__':
+    # robot.test_toolpath()
+    for i in range(63):
+        print("Cycle {}".format(i+1))
+        robot.transfer_plate("OT2-TC", "OT2-WORK1", 0.25, detach_plate=True)
+        robot.transfer_plate("OT2-WORK1", "OT2-TC", 0.25, detach_plate=True)
+        print("Waiting...")
+        time.sleep(2)
+    # robot.transfer_plate("OT2-MAG", "OT2-WORK1", 0.1)
+    # robot.transfer_plate("OT2-WORK1", "OT2-TC", 0.1, detach_plate=True)
+    # test_cycle()
+    # robot.transfer_plate("OT2-TC", "OT2-WORK1", max_speed=0.1)
+    # robot.transfer_plate("OT2-WORK1", "OT2-TC", max_speed=0.1)
+    # robot.transfer_plate("OT2-WORK1", "OT2-SLOT6", max_speed=0.1)
 
     # for i in range(10):
     #
@@ -74,7 +90,7 @@ if __name__ == '__main__':
 
     # Test code to save current position with a name
     # First move the robot to the needed position, than run this instruction
-    # robot.save_position("OT1-SLOT1")
+    # robot.save_position("OT2-TC")
 
 
 
