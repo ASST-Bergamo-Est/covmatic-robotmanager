@@ -21,19 +21,6 @@ logger.info("Starting version {}".format(__version__))
 robot = Robot(EVA_IP_ADDRESS, token, logger)
 
 
-# def handler(signum, frame):
-#     logger.error("Signal received: {}".format(signum))
-#     robot.kill()
-#
-#
-# signal.signal(signal.SIGALRM, handler)
-# signal.signal(signal.SIGTERM, handler)
-# signal.signal(signal.SIGKILL, handler)
-# signal.signal(signal.SIGINT, handler)
-# signal.signal(signal.SIGHUP, handler)
-# signal.signal(signal.SIGABRT, handler)
-
-
 def test_cycle():
     max_speed = 0.25
     plate_order = ["OT1-SLOT1", "OT2-SLOT1", "OT1-SLOT1", "OT1-SLOT3", "OT1-SLOT2", "OT1-SLOT4", "OT1-SLOT11"]
