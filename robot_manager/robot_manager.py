@@ -6,17 +6,18 @@ import logging
 import time
 from enum import Enum
 
-from evasdk import Eva
-from . import __version__
-from .EvaHelper import EvaHelper
-from .gripper import EvaGripper
 from .movement import Movement
+from .EvaHelper import EvaHelper
 
 
 class GripperStatus(Enum):
     open = 0,
     closed = 1,
     undefined = 2
+
+
+class RobotManagerException(Exception):
+    pass
 
 
 class Robot:
@@ -42,8 +43,24 @@ class Robot:
     def transfer_plate(self, source_pos, dest_pos, max_speed=None, detach_plate=False):
         self._movement.transfer_plate(source_pos, dest_pos, max_speed, detach_plate=detach_plate)
 
-    def set_pickup_position(self, position, plate_name):
-        pass
+    def pick_up_plate(self, position, plate_name):
+        self._logger.info("Requested pickup from {} for plate {}".format(position, plate_name))
+        self._pickup_pos = position
+        self._check_and_set_plate_name(plate_name)
+        self._check_and_execute_transfer()
 
-    # def _check_and_set_plate_name(self, plate_name):
-    #     if not self._plate:
+    def drop_plate(self, position, plate_name):
+        self._logger.info("Requested drop to {} for plate {}".format(position, plate_name))
+        self._drop_pos = position
+        self._check_and_set_plate_name(plate_name)
+        self._check_and_execute_transfer()
+
+    def _check_and_set_plate_name(self, plate_name):
+        if not self._plate:
+            self._plate = plate_name
+        elif self._plate != plate_name:
+            raise RobotManagerException("New plate {} not assigned: already present {} plate".format(plate_name, self._plate))
+
+    def _check_and_execute_transfer(self):
+        if self._plate and self._pickup_pos and self._drop_pos:
+            self._movement.transfer_plate(self._pickup_pos, self._drop_pos)
