@@ -99,6 +99,13 @@ def test_plate_not_transferred_pickup(robot):
 
 
 @patch.object(Movement, "transfer_plate", FakeMovement.transfer_plate)
+def test_plate_not_transferred_drop(robot):
+    FakeMovement.reset_calls()
+    robot.drop_plate(DROP_POS1, PLATE_NAME1)
+    FakeMovement.check_calls(0)
+
+
+@patch.object(Movement, "transfer_plate", FakeMovement.transfer_plate)
 def test_complete_transfer(robot):
     FakeMovement.reset_calls()
     robot.pick_up_plate(PICK_POS1, PLATE_NAME1)
@@ -106,11 +113,30 @@ def test_complete_transfer(robot):
     FakeMovement.check_calls(1)
 
 
+@pytest.fixture
 @patch.object(Movement, "transfer_plate", FakeMovement.transfer_plate)
-def test_plate_not_transferred_drop(robot):
-    FakeMovement.reset_calls()
+def complete_transfer(robot):
+    robot.pick_up_plate(PICK_POS1, PLATE_NAME1)
     robot.drop_plate(DROP_POS1, PLATE_NAME1)
-    FakeMovement.check_calls(0)
 
 
+def test_plate_is_cleared_after_completion(robot, complete_transfer):
+    assert robot._plate is None
+
+
+def test_pick_pos_is_cleared_after_completion(robot, complete_transfer):
+    assert robot._pickup_pos is None
+
+
+def test_drop_pos_is_cleared_after_completion(robot, complete_transfer):
+    assert robot._pickup_pos is None
+
+@patch.object(Movement, "transfer_plate", FakeMovement.transfer_plate)
+def test_two_transfers(robot):
+    FakeMovement.reset_calls()
+    robot.pick_up_plate(PICK_POS1, PLATE_NAME1)
+    robot.drop_plate(DROP_POS1, PLATE_NAME1)
+    robot.pick_up_plate(PICK_POS2, PLATE_NAME2)
+    robot.drop_plate(DROP_POS2, PLATE_NAME2)
+    FakeMovement.check_calls(2)
 

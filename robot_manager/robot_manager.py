@@ -64,3 +64,10 @@ class Robot:
     def _check_and_execute_transfer(self):
         if self._plate and self._pickup_pos and self._drop_pos:
             self._movement.transfer_plate(self._pickup_pos, self._drop_pos)
+            self.clear_transfer()
+
+    def clear_transfer(self):
+        self._plate = None
+        self._pickup_pos = None
+        self._drop_pos = None
+
