@@ -287,18 +287,6 @@ class Movement:
             tp.add_movement("pick_pos", "linear", max_speed=approach_speed)
 
         gripper.close()
-        if not gripper.has_plate():
-            gripper.open()
-            with ToolpathExecute(tp):
-                tp.add_movement("pick_pos")
-                tp.add_movement("pick_pos_near", "linear", max_speed=approach_speed)
-            gripper.close()
-            with ToolpathExecute(tp):
-                tp.add_movement("pick_pos_near", )
-                tp.add_movement("pick_pos_up", "linear")
-                tp.add_movement("pick_home", "linear")
-
-            raise Exception("Plate not grabbed!")
 
         with ToolpathExecute(tp):
             if detach_plate:
@@ -306,6 +294,21 @@ class Movement:
             else:
                 tp.add_movement("pick_pos")
             tp.add_movement("pick_pos_near", "linear", max_speed=approach_speed)
+
+        if not gripper.has_plate():
+            gripper.open()
+            with ToolpathExecute(tp):
+                tp.add_movement("pick_pos_near", )
+                tp.add_movement("pick_pos_up", "linear", max_speed=approach_speed)
+            gripper.close()
+            with ToolpathExecute(tp):
+                tp.add_movement("pick_pos_up")
+                tp.add_movement("pick_home", "linear")
+
+            raise Exception("Plate not grabbed!")
+
+        with ToolpathExecute(tp):
+            tp.add_movement("pick_pos_near")
             tp.add_movement("pick_pos_up", "linear")
 
             if is_different_owner:
