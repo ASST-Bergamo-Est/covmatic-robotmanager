@@ -124,7 +124,8 @@ class Movement:
 
         pos_z = self._positions.get_xyz("{}".format(pos))["position"]["z"]
         raising_height = -(z_to_reach - pos_z)     # Changed sign since with normal orientaion positive it toward bottom
-
+        if raising_height > 0:
+            raising_height = 0
         self._logger.info("We've to raise of {}".format(raising_height))
         return raising_height
 
