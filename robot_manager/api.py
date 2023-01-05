@@ -3,7 +3,9 @@ import json
 from flask import request
 from flask_restful import Api, Resource
 from . import __version__
-from robot_manager import robot_manager
+from .robot_manager import RobotManager
+
+robot_manager = RobotManager()
 
 class RobotManagerApi(Api):
     def __init__(self, *args, **kwargs):
@@ -11,7 +13,7 @@ class RobotManagerApi(Api):
         self.add_resource(Helloworld, '/')
         self.add_resource(Version, '/version')
         self.add_resource(CheckAction, '/action/check/<string:action_id>')
-        self.add_resource(RequestAction, '/action/<string:action>/<string:machine>/<string:position>/<string:plate_name>')
+        self.add_resource(RequestAction, '/action/<string:action>/<string:machine>/<string:slot>/<string:plate_name>')
 
 
 class Helloworld(Resource):
@@ -33,9 +35,10 @@ class CheckAction(Resource):
 
 
 class RequestAction(Resource):
-    def post(self, action, machine, position, plate_name):
+    def post(self, action, machine, slot, plate_name):
         try:
             print("Received options: {}".format(request.get_json()))
         except TypeError as e:
             print("Got error: {}".format(e))
+        robot_manager.action_request(action, machine, slot, plate_name)
         return {'action_id': 'fake-id'}
