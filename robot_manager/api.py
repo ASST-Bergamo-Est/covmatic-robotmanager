@@ -40,5 +40,5 @@ class RequestAction(Resource):
             print("Received options: {}".format(request.get_json()))
         except TypeError as e:
             print("Got error: {}".format(e))
-        robot_manager.action_request(action, machine, slot, plate_name)
-        return {'action_id': 'fake-id'}
+        action_id = robot_manager.action_request(action, machine, slot, plate_name)
+        return {'action_id': action_id}

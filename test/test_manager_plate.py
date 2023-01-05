@@ -1,8 +1,8 @@
 import logging
 import pytest
 
-from ..robot_manager.robot_manager import Movement
-from ..robot_manager.robot_manager import Robot, RobotManagerException
+from ..robot_manager.robot import Movement
+from ..robot_manager.robot import Robot, RobotException
 from ..robot_manager.EvaHelper import EvaHelper
 from mock import patch, Mock
 
@@ -80,13 +80,13 @@ def test_drop_plate_name_is_saved(robot):
 
 def test_error_if_multiple_pickup(robot):
     robot.pick_up_plate(PICK_POS1, PLATE_NAME1)
-    with pytest.raises(RobotManagerException):
+    with pytest.raises(RobotException):
         robot.pick_up_plate(PICK_POS1, PLATE_NAME2)
 
 
 def test_error_if_multiple_drop(robot):
     robot.drop_plate(PICK_POS1, PLATE_NAME1)
-    with pytest.raises(RobotManagerException):
+    with pytest.raises(RobotException):
         robot.drop_plate(PICK_POS1, PLATE_NAME2)
 
 

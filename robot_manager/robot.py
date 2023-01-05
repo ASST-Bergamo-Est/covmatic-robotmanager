@@ -62,9 +62,13 @@ class Robot:
             raise RobotException("New plate {} not assigned: already present {} plate".format(plate_name, self._plate))
 
     def _check_and_execute_transfer(self):
-        if self._plate and self._pickup_pos and self._drop_pos:
-            self._movement.transfer_plate(self._pickup_pos, self._drop_pos)
-            self.clear_transfer()
+        if self._plate:
+            if self._pickup_pos:
+                self._movement.pick_plate(self._pickup_pos)
+                self._pickup_pos = None
+            if self._drop_pos:
+                self._movement.drop_plate(self._drop_pos)
+                self.clear_transfer()
 
     def clear_transfer(self):
         self._plate = None
