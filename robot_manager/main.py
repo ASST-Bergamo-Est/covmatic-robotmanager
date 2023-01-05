@@ -5,28 +5,38 @@
 import logging
 import time
 
+from flask import Flask, request
+
+from .api import RobotManagerApi
 from .robot_manager import Robot
 from . import __version__
-
-# EVA Configuration
-EVA_IP_ADDRESS = "10.213.55.80"
-EVA_TOKEN = '35ad1b7da935684d10afdc09a5842d5e6403b0f8'
-
-# Server configuration
-SERVER_PORT = 80
 
 logger = logging.getLogger(__name__)
 logger.info("Starting version {}".format(__version__))
 
-robot = Robot(EVA_IP_ADDRESS, EVA_TOKEN, logger)
+
+class RobotManagerApp(Flask):
+    def __init__(self, name=__name__, *args, **kwargs):
+        super(RobotManagerApp, self).__init__(name, *args, **kwargs)
+        RobotManagerApi().init_app(self)
+
+
+def shutdown_server():
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
 
 
 if __name__ == '__main__':
-    robot.pick_up_plate("OT2-TC", "PLATE1")
-    robot.drop_plate("OT2-WORK1", "PLATE1")
+    app = RobotManagerApp()
 
-    robot.pick_up_plate("OT2-WORK1", "REAGENT")
-    robot.drop_plate("OT2-TC", "REAGENT")
+    @app.route('/shutdown', methods=['GET'])
+    def shutdown():
+        shutdown_server()
+        return "Server is shutting down..."
+
+    app.run(host='::', port=5000, debug=True)
 
 
 
