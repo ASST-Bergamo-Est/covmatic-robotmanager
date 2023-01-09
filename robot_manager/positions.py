@@ -19,7 +19,7 @@ class Positions:
         with open(self._abs_path, "r") as fp:
             self._positions = json.load(fp)
 
-        self._logger.info("Loaded positions: {}".format(self._positions))
+        self._logger.debug("Loaded positions: {}".format(self._positions))
 
     def save(self, name, field, data):
         self._logger.info("Saving position name {} field {} data {}".format(name, field, data))

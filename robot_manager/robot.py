@@ -6,7 +6,7 @@ import logging
 import time
 from enum import Enum
 
-from .movement import Movement
+from .movement import Movement, MovementException
 from .EvaHelper import EvaHelper
 
 
@@ -62,13 +62,17 @@ class Robot:
             raise RobotException("New plate {} not assigned: already present {} plate".format(plate_name, self._plate))
 
     def _check_and_execute_transfer(self):
-        if self._plate:
-            if self._pickup_pos:
-                self._movement.pick_plate(self._pickup_pos)
-                self._pickup_pos = None
-            if self._drop_pos:
-                self._movement.drop_plate(self._drop_pos)
-                self.clear_transfer()
+        try:
+            if self._plate:
+                if self._pickup_pos:
+                    self._movement.pick_plate(self._pickup_pos)
+                    self._pickup_pos = None
+                if self._drop_pos:
+                    self._movement.drop_plate(self._drop_pos)
+                    self.clear_transfer()
+        except MovementException as e:
+            self._logger.info("Exception during movement: {}".format(e))
+            raise RobotException(e)
 
     def clear_transfer(self):
         self._plate = None

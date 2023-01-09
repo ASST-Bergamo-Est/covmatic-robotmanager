@@ -7,6 +7,7 @@ from .robot_manager import RobotManager
 
 robot_manager = RobotManager()
 
+
 class RobotManagerApi(Api):
     def __init__(self, *args, **kwargs):
         super(RobotManagerApi, self).__init__(*args, **kwargs)
@@ -15,6 +16,9 @@ class RobotManagerApi(Api):
         self.add_resource(CheckAction, '/action/check/<string:action_id>')
         self.add_resource(RequestAction, '/action/<string:action>/<string:machine>/<string:slot>/<string:plate_name>')
 
+    @staticmethod
+    def shutdown():
+        robot_manager.shutdown()
 
 class Helloworld(Resource):
     def get(self):

@@ -17,6 +17,11 @@ EVA_TCP = {
     "radius": 0.07,
     "rotations": {"x": 0, "y": 0, "z": 0}}
 
+
+class MovementException(Exception):
+    pass
+
+
 class Movement:
     def __init__(self, logger=logging.getLogger(__name__)):
         self._eva = EvaHelper().eva
@@ -395,7 +400,7 @@ class Movement:
                 tp.add_movement("pick_pos_up")
                 tp.add_movement("pick_home", "linear")
 
-            raise Exception("Plate not grabbed!")
+            raise MovementException("Plate not grabbed!")
 
         with ToolpathExecute(tp):
             tp.add_movement("pick_pos_near")

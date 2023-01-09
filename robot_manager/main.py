@@ -35,6 +35,7 @@ if __name__ == '__main__':
 
     @app.route('/shutdown', methods=['GET'])
     def shutdown():
+        RobotManagerApi.shutdown()
         shutdown_server()
         return "Server is shutting down..."
 
