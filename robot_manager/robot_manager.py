@@ -27,13 +27,11 @@ class RobotManager(Singleton):
         self.start_threads()
 
     def start_threads(self):
-        for f in [self.action_processor_thread, self.killer_thread]:
+        for f in [self.action_processor_thread]:
             th = Thread(target=f, name=f.__name__)
             self._threads.append(th)
             self._logger.info("Starting thread {}".format(th.name))
             th.start()
-
-
 
     def action_request(self, action, machine, slot, plate_name, options=None):
         position = "{}-{}".format(machine, slot)
@@ -51,6 +49,11 @@ class RobotManager(Singleton):
     def shutdown(self):
         self._logger.info("Shutdown command received")
         self._kill_event.set()
+        self._actions_queue.put({"action": "terminate"})
+        for th in self._threads:
+            self._logger.info("Joining thread {}".format(th.name))
+            th.join()
+        self._logger.info("Shutdown exiting")
 
     def action_scheduler(self):
         done_actions = []
@@ -84,6 +87,8 @@ class RobotManager(Singleton):
         while not self._kill_event.isSet():
             self._logger.info("action processor thread waiting for element")
             new_action = self._actions_queue.get()
+            if new_action['action'] == "terminate":
+                break
             if new_action['action'] == "pick":
                 self._logger.info("Adding action in the beginning: {}".format(new_action))
                 self._actions.insert(0, new_action)
@@ -93,11 +98,7 @@ class RobotManager(Singleton):
             self.action_scheduler()
         self._logger.info("action processor thread exiting")
 
-    def killer_thread(self):
-        self._logger.info("kill thread waiting for event")
-        self._kill_event.wait()
-        self._logger.info("kill thread event detected")
-        self._actions_queue.join()
-        self._logger.info("kill thread exiting")
+
+
 
 
