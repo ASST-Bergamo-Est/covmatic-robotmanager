@@ -50,35 +50,39 @@ drop_action2 = {
     'id': "2"
 }
 
-@patch("RobotManager.robot_manager.robot_manager.Robot")
+# @patch("RobotManager.robot_manager.robot_manager.Robot")
 class TestRobotManager(unittest.TestCase):
-    def test_instance_creation(self, mock_robot):
-        rm = RobotManager()
 
-    def test_instannce_has_robot(self, mock_robot):
-        rm = RobotManager()
-        mock_robot.assert_called_once()
+    def setUp(self) -> None:
+        self._robot_patcher = patch("RobotManager.robot_manager.robot_manager.Robot")
+        self._mock_robot = self._robot_patcher.start()
+        self._rm = RobotManager()
 
-    def test_action_request(self, mock_robot):
-        rm = RobotManager()
-        rm.action_request(PICK_ACTION, MACHINE1, SLOT1, PLATE1)
+    def tearDown(self) -> None:
+        self._rm.shutdown()
+        self._robot_patcher.stop()
 
-    def test_action_request_return_value(self, mock_robot):
-        rm = RobotManager()
-        assert rm.action_request(PICK_ACTION, MACHINE1, SLOT1, PLATE1)
+    def test_instance_creation(self):
+        assert self._rm
 
-    def test_action_request_return_value_drop(self, mock_robot):
-        rm = RobotManager()
-        assert rm.action_request(DROP_ACTION, MACHINE1, SLOT1, PLATE1)
+    def test_instannce_has_robot(self):
+        self._mock_robot.assert_called_once()
+
+    def test_action_request(self):
+        self._rm.action_request(PICK_ACTION, MACHINE1, SLOT1, PLATE1)
+
+    def test_action_request_return_value(self):
+        assert self._rm.action_request(PICK_ACTION, MACHINE1, SLOT1, PLATE1)
+
+    def test_action_request_return_value_drop(self):
+        assert self._rm.action_request(DROP_ACTION, MACHINE1, SLOT1, PLATE1)
 
     # Test for the action scheduler
-    def test_action_scheduler_empty_queue(self, mock_robot):
-        rm = RobotManager()
+    def test_action_scheduler_empty_queue(self):
+        self._rm.action_scheduler()
 
-        rm.action_scheduler()
-
-        mock_robot.pick_up_plate.assert_not_called()
-        mock_robot.drop_plate.assert_not_called()
+        self._mock_robot.pick_up_plate.assert_not_called()
+        self._mock_robot.drop_plate.assert_not_called()
 
 
     ## This test does not work!
@@ -90,88 +94,71 @@ class TestRobotManager(unittest.TestCase):
     #     rm.action_scheduler()
     #     mock_robot.pick_up_plate.assert_called_once()
 
-    def test_action_scheduler_pick_set_plate(self, mock_robot):
-        rm = RobotManager()
 
-        rm._actions.append(pick_action1)
-        rm.action_scheduler()
+    def test_action_scheduler_pick_set_plate(self):
+        self._rm._actions.append(pick_action1)
+        self._rm.action_scheduler()
 
-        assert rm._current_plate == pick_action1["plate_name"]
+        assert self._rm._current_plate == pick_action1["plate_name"]
 
-    def test_action_scheduler_drop_action_do_nothing_on_state(self, mock_robot):
-        rm = RobotManager()
+    def test_action_scheduler_drop_action_do_nothing_on_state(self):
+        self._rm._actions.append(drop_action1)
 
-        rm._actions.append(drop_action1)
+        self._rm.action_scheduler()
+        assert self._rm._current_plate is None
 
-        rm.action_scheduler()
-        assert rm._current_plate is None
+    def test_action_scheduler_drop_action_do_nothing_on_plate(self):
+        self._rm._actions.append(drop_action1)
 
-    def test_action_scheduler_drop_action_do_nothing_on_plate(self, mock_robot):
-        rm = RobotManager()
+        self._rm.action_scheduler()
+        assert self._rm._current_plate != drop_action1["plate_name"]
 
-        rm._actions.append(drop_action1)
+    def test_both_action_present_ordered_final_state(self):
+        self._rm._actions.append(pick_action1)
+        self._rm._actions.append(drop_action1)
+        self._rm.action_scheduler()
 
-        rm.action_scheduler()
-        assert rm._current_plate != drop_action1["plate_name"]
+        assert self._rm._current_plate is None
 
-    def test_both_action_present_ordered_final_state(self, mock_robot):
-        rm = RobotManager()
+    def test_both_done_action_is_deleted_pick(self):
+        self._rm._actions.append(pick_action1)
+        self._rm._actions.append(drop_action1)
+        self._rm.action_scheduler()
 
-        rm._actions.append(pick_action1)
-        rm._actions.append(drop_action1)
-        rm.action_scheduler()
+        assert pick_action1 not in self._rm._actions
 
-        assert rm._current_plate is None
+    def test_both_done_action_is_deleted_drop(self):
+        self._rm._actions.append(pick_action1)
+        self._rm._actions.append(drop_action1)
+        self._rm.action_scheduler()
 
-    def test_both_done_action_is_deleted_pick(self, mock_robot):
-        rm = RobotManager()
+        assert drop_action1 not in self._rm._actions
 
-        rm._actions.append(pick_action1)
-        rm._actions.append(drop_action1)
-        rm.action_scheduler()
+    def test_undone_action_is_present(self):
+        self._rm._actions.append(pick_action1)
+        self._rm._actions.append(drop_action2)
+        self._rm._actions.append(drop_action1)
+        self._rm.action_scheduler()
 
-        assert pick_action1 not in rm._actions
+        assert drop_action2 in self._rm._actions
 
-    def test_both_done_action_is_deleted_drop(self, mock_robot):
-        rm = RobotManager()
+    def test_pick_different_plate_stay_queued(self):
+        self._rm._actions.append(pick_action1)
+        self._rm.action_scheduler()
 
-        rm._actions.append(pick_action1)
-        rm._actions.append(drop_action1)
-        rm.action_scheduler()
+        self._rm._actions.append(pick_action2)
+        self._rm.action_scheduler()
 
-        assert drop_action1 not in rm._actions
+        assert pick_action2 in self._rm._actions
 
-    def test_undone_action_is_present(self, mock_robot):
-        rm = RobotManager()
+    def test_pick_different_plate_plate_not_modified(self):
+        self._rm._actions.append(pick_action1)
+        self._rm.action_scheduler()
 
-        rm._actions.append(pick_action1)
-        rm._actions.append(drop_action2)
-        rm._actions.append(drop_action1)
-        rm.action_scheduler()
+        self._rm._actions.append(pick_action2)
+        self._rm.action_scheduler()
 
-        assert drop_action2 in rm._actions
-
-    def test_pick_different_plate_stay_queued(self, mock_robot):
-        rm = RobotManager()
-
-        rm._actions.append(pick_action1)
-        rm.action_scheduler()
-
-        rm._actions.append(pick_action2)
-        rm.action_scheduler()
-
-        assert pick_action2 in rm._actions
-
-    def test_pick_different_plate_plate_not_modified(self, mock_robot):
-        rm = RobotManager()
-
-        rm._actions.append(pick_action1)
-        rm.action_scheduler()
-
-        rm._actions.append(pick_action2)
-        rm.action_scheduler()
-
-        assert rm._current_plate == pick_action1["plate_name"]
+        assert self._rm._current_plate == pick_action1["plate_name"]
 
     # def test_check(self, mock_robot):
     #     rm = RobotManager()
