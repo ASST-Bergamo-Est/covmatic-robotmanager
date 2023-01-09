@@ -81,18 +81,13 @@ class TestRobotManager(unittest.TestCase):
     def test_action_scheduler_empty_queue(self):
         self._rm.action_scheduler()
 
-        self._mock_robot.pick_up_plate.assert_not_called()
-        self._mock_robot.drop_plate.assert_not_called()
+        self._mock_robot().pick_up_plate.assert_not_called()
+        self._mock_robot().drop_plate.assert_not_called()
 
-
-    ## This test does not work!
-    # def test_action_scheduler_pick_action_call_robot(self, mock_robot):
-    #     rm = RobotManager()
-    #
-    #     rm._actions.append(pick_action1)
-    #
-    #     rm.action_scheduler()
-    #     mock_robot.pick_up_plate.assert_called_once()
+    def test_action_scheduler_pick_action_call_robot(self):
+        self._rm._actions.append(pick_action1)
+        self._rm.action_scheduler()
+        self._mock_robot().pick_up_plate.assert_called_once()
 
 
     def test_action_scheduler_pick_set_plate(self):
