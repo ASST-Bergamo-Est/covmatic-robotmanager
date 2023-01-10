@@ -108,7 +108,27 @@ class RobotManager(Singleton):
             self.action_scheduler()
         self._logger.info("action processor thread exiting")
 
+    def check_action(self, action_id):
+        self._logger.info("Checking action id {}".format(action_id))
 
+        state = "pending"
+        if self._actions_queue.empty() and self._is_action_finished(action_id):
+            state = "finished"
 
+        self._logger.info("Action id {} state {}".format(action_id, state))
+        return {"state": state}
+
+    def _is_action_finished(self, action_id):
+        """ Check the actions array to know if the action id passed is finished """
+        for a in self._actions:
+            if a["id"] == action_id:
+                return False
+        return True
+
+    def error_handler(self):
+        """ This function should handle error in some way.
+            for now we just set an internal state to avoid unwanted movement """
+        self._logger.info("Error handling function")
+        self._current_plate = "ERROR"
 
 

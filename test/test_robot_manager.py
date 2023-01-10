@@ -3,6 +3,7 @@ import unittest
 import pytest
 from mock import Mock, patch
 
+from ..robot_manager.robot import RobotException
 from ..robot_manager.robot_manager import RobotManager, Robot, RobotManagerException
 
 PICK_ACTION = "pick"
@@ -19,6 +20,8 @@ SLOT2 = "SLOT2"
 POSITION2 = "{}-{}".format(MACHINE2, SLOT2)
 PLATE2 = "PLATE2"
 
+ERROR_PLATE_CODE = "ERROR"
+
 WRONG_ACTION = "wrong"
 FAKE_ACTION_ID = "fakeaction"
 
@@ -33,21 +36,21 @@ pick_action2 = {
         'action': PICK_ACTION,
         'position': POSITION2,
         'plate_name': PLATE2,
-        'id': "0"
+        'id': "1"
     }
 
 drop_action1 = {
     'action': DROP_ACTION,
     'position': POSITION1,
     'plate_name': PLATE1,
-    'id': "1"
+    'id': "2"
 }
 
 drop_action2 = {
     'action': DROP_ACTION,
     'position': POSITION2,
     'plate_name': PLATE2,
-    'id': "2"
+    'id': "3"
 }
 
 
@@ -78,6 +81,11 @@ class TestBasicActions(TestRobotManager):
 
     def test_action_request_return_value_drop(self):
         assert self._rm.action_request(DROP_ACTION, MACHINE1, SLOT1, PLATE1)
+
+    def test_action_return_different_values(self):
+        id1 = self._rm.action_request(PICK_ACTION, MACHINE1, SLOT1, PLATE1)
+        id2 = self._rm.action_request(DROP_ACTION, MACHINE1, SLOT1, PLATE1)
+        self.assertNotEqual(id1, id2)
 
 class TestActionScheduler(TestRobotManager):
     def test_action_scheduler_empty_queue(self):
@@ -157,12 +165,38 @@ class TestActionScheduler(TestRobotManager):
 
         assert self._rm._current_plate == pick_action1["plate_name"]
 
+    def test_error_during_action_clear_states(self):
+        self._mock_robot().pick_up_plate.side_effect = RobotException("Test")
+        self._rm._actions.append(pick_action1)
+        self._rm.action_scheduler()
+        self.assertIs(self._rm._current_plate, ERROR_PLATE_CODE)
 
-# class TestCheckAction(TestRobotManager):
-#     def test_check(self):
-#         rm = RobotManager()
-#         action_id = rm.action_request(PICK_ACTION, MACHINE1, SLOT1, PLATE1)
-#         rm.check_action(action_id)
+class TestCheckAction(TestRobotManager):
+
+    def setUp(self) -> None:
+        super().setUp()
+        self._rm._actions = [pick_action1, drop_action1]
+
+    def test_function_exists(self):
+        self._rm.check_action(pick_action1["id"])
+
+    def test_action_contains_state(self):
+        answer = self._rm.check_action(pick_action1["id"])
+        self.assertIn("state", answer)
+
+    def test_state_pending_action(self):
+        answer = self._rm.check_action(pick_action1["id"])
+        self.assertIs(answer["state"], "pending")
+
+    def test_state_finished_action(self):
+        answer = self._rm.check_action(pick_action2["id"])
+        self.assertIs(answer["state"], "finished")
+
+    def test_action_queued_but_not_read(self):
+        """ Case to check that if executor thread has not run the result will be pending """
+        action_id = self._rm.action_request(PICK_ACTION, MACHINE1, SLOT1, PLATE1)
+        answer = self._rm.check_action(action_id)
+        self.assertIs(answer["state"], "pending")
 
     # def test_check_action_not_existing(self, mock_robot):
     #     rm = RobotManager()
