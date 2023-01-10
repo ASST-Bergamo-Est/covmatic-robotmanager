@@ -3,6 +3,7 @@ import unittest
 
 import pytest
 
+from ..robot_manager.movement import MovementException
 from ..robot_manager.robot import Movement
 from ..robot_manager.robot import Robot, RobotException
 from ..robot_manager.EvaHelper import EvaHelper
@@ -79,3 +80,12 @@ class ManagerPlateTest(unittest.TestCase):
         self._r.drop_plate(DROP_POS1)
         self._mock_movement().drop_plate.assert_called()
 
+    def test_pick_plate_not_grabbed_exception_is_caught(self):
+        self._mock_movement().pick_plate.side_effect = MovementException("Test")
+        with self.assertRaises(RobotException):
+            self._r.pick_up_plate(PICK_POS1)
+
+    def test_movement_exception_is_caught_drop(self):
+        self._mock_movement().drop_plate.side_effect = MovementException("Test")
+        with self.assertRaises(RobotException):
+            self._r.drop_plate(DROP_POS1)

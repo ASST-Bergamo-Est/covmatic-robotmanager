@@ -91,6 +91,7 @@ class RobotManager(Singleton):
                 raise RobotManagerException("Action {} not implemented".format(action))
         except RobotException as e:
             self._logger.error("Error from robot during action: {}".format(e))
+            self.error_handler()
 
     def action_processor_thread(self):
         self._logger.info("Entered action processor thread")
