@@ -26,9 +26,6 @@ class Robot:
         self._eva_helper = EvaHelper()
         self._eva_helper.connect(eva_ip_address, token)
         self._movement = Movement()
-        self._pickup_pos = None
-        self._drop_pos = None
-        self._plate = None
 
     def unlock(self):
         self._eva_helper.disconnect()
@@ -43,39 +40,12 @@ class Robot:
     def transfer_plate(self, source_pos, dest_pos, max_speed=None, detach_plate=False):
         self._movement.transfer_plate(source_pos, dest_pos, max_speed, detach_plate=detach_plate)
 
-    def pick_up_plate(self, position, plate_name):
-        self._logger.info("Requested pickup from {} for plate {}".format(position, plate_name))
-        self._pickup_pos = position
-        self._check_and_set_plate_name(plate_name)
-        self._check_and_execute_transfer()
+    def pick_up_plate(self, position):
+        self._logger.info("Requested pickup from {}".format(position))
+        self._movement.pick_plate(position)
 
-    def drop_plate(self, position, plate_name):
-        self._logger.info("Requested drop to {} for plate {}".format(position, plate_name))
-        self._drop_pos = position
-        self._check_and_set_plate_name(plate_name)
-        self._check_and_execute_transfer()
+    def drop_plate(self, position):
+        self._logger.info("Requested drop to {}".format(position))
+        self._movement.drop_plate(position)
 
-    def _check_and_set_plate_name(self, plate_name):
-        if not self._plate:
-            self._plate = plate_name
-        elif self._plate != plate_name:
-            raise RobotException("New plate {} not assigned: already present {} plate".format(plate_name, self._plate))
-
-    def _check_and_execute_transfer(self):
-        try:
-            if self._plate:
-                if self._pickup_pos:
-                    self._movement.pick_plate(self._pickup_pos)
-                    self._pickup_pos = None
-                if self._drop_pos:
-                    self._movement.drop_plate(self._drop_pos)
-                    self.clear_transfer()
-        except MovementException as e:
-            self._logger.info("Exception during movement: {}".format(e))
-            raise RobotException(e)
-
-    def clear_transfer(self):
-        self._plate = None
-        self._pickup_pos = None
-        self._drop_pos = None
 

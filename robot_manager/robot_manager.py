@@ -2,7 +2,7 @@ import concurrent
 from enum import Enum
 from threading import Event, Thread
 
-from .robot import Robot
+from .robot import Robot, RobotException
 from .singleton import Singleton
 from . import EVA_IP_ADDRESS, EVA_TOKEN
 from queue import Queue
@@ -63,24 +63,34 @@ class RobotManager(Singleton):
             print("current_plate: {}".format(self._current_plate))
 
             if a["action"] == "pick" and self._current_plate is None:
-                print("action is pick")
                 self._current_plate = a["plate_name"]
-                try:
-                    self._robot.pick_up_plate(a["position"], a["plate_name"])
-                except RobotManagerException as e:
-                    self._logger.info("Received exception during transfer: {}".format(e))
+                self.execute_action(a)
                 done_actions.append(a)
 
             if a["action"] == "drop" \
                     and a["plate_name"] == self._current_plate:
                 print("Drop plate!")
-                self._robot.drop_plate(a["position"], a["plate_name"])
+                self.execute_action(a)
                 self._current_plate = None
                 done_actions.append(a)
             print("Ended cycle {}; actions: {}".format(i, self._actions))
 
         for da in done_actions:
             self._actions.remove(da)
+
+    def execute_action(self, a):
+        action = a["action"]
+        position = a["position"]
+        self._logger.info("Executing action {} position {}".format(action, position))
+        try:
+            if action == "pick":
+                self._robot.pick_up_plate(position)
+            elif action == "drop":
+                self._robot.drop_plate(position)
+            else:
+                raise RobotManagerException("Action {} not implemented".format(action))
+        except RobotException as e:
+            self._logger.error("Error from robot during action: {}".format(e))
 
     def action_processor_thread(self):
         self._logger.info("Entered action processor thread")

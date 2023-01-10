@@ -50,9 +50,9 @@ drop_action2 = {
     'id': "2"
 }
 
-# @patch("RobotManager.robot_manager.robot_manager.Robot")
-class TestRobotManager(unittest.TestCase):
 
+class TestRobotManager(unittest.TestCase):
+    """ Base class to subclass for test execution """
     def setUp(self) -> None:
         self._robot_patcher = patch("RobotManager.robot_manager.robot_manager.Robot")
         self._mock_robot = self._robot_patcher.start()
@@ -62,6 +62,8 @@ class TestRobotManager(unittest.TestCase):
         self._rm.shutdown()
         self._robot_patcher.stop()
 
+
+class TestBasicActions(TestRobotManager):
     def test_instance_creation(self):
         assert self._rm
 
@@ -77,7 +79,7 @@ class TestRobotManager(unittest.TestCase):
     def test_action_request_return_value_drop(self):
         assert self._rm.action_request(DROP_ACTION, MACHINE1, SLOT1, PLATE1)
 
-    # Test for the action scheduler
+class TestActionScheduler(TestRobotManager):
     def test_action_scheduler_empty_queue(self):
         self._rm.action_scheduler()
 
@@ -155,11 +157,13 @@ class TestRobotManager(unittest.TestCase):
 
         assert self._rm._current_plate == pick_action1["plate_name"]
 
-    # def test_check(self, mock_robot):
-    #     rm = RobotManager()
-    #     action_id = rm.action_request(PICK_ACTION, MACHINE1, SLOT1, PLATE1)
-    #     rm.check_action(action_id)
-    #
+
+# class TestCheckAction(TestRobotManager):
+#     def test_check(self):
+#         rm = RobotManager()
+#         action_id = rm.action_request(PICK_ACTION, MACHINE1, SLOT1, PLATE1)
+#         rm.check_action(action_id)
+
     # def test_check_action_not_existing(self, mock_robot):
     #     rm = RobotManager()
     #     with pytest.raises(RobotManagerException):

@@ -1,4 +1,6 @@
 import logging
+import unittest
+
 import pytest
 
 from ..robot_manager.robot import Movement
@@ -18,125 +20,62 @@ PLATE_NAME1 = "REAGENT"
 PLATE_NAME2 = "WASH"
 
 
-class FakeEvaHelper:
-    def __init__(self):
-        pass
-
-    def connect(self, *args, **kwargs):
-        pass
-
-
-class FakeMovement:
-    transfer_calls = 0
-
-    def __init__(self):
-        self.__class__.transfer_calls = 0
-
-    @classmethod
-    def transfer_plate(cls, *args, **kwargs):
-        cls.transfer_calls += 1
-
-    @classmethod
-    def reset_calls(cls):
-        cls.transfer_calls = 0
-
-    @classmethod
-    def check_calls(cls, calls):
-        if cls.transfer_calls != calls:
-            raise Exception("Calls expected {} got {}".format(calls, cls.transfer_calls))
-
-
-@pytest.fixture
-@patch.object(Movement, "__init__", FakeMovement.__init__)
-@patch.object(EvaHelper, "connect")
-def robot(mock_connect):
-    _robot = Robot(eva_ip_address=FAKE_IP_ADDRESS, token=FAKE_TOKEN, logger=fake_logger)
-    return _robot
+# class FakeEvaHelper:
+#     def __init__(self):
+#         pass
+#
+#     def connect(self, *args, **kwargs):
+#         pass
+#
+#
+# class FakeMovement:
+#     transfer_calls = 0
+#
+#     def __init__(self):
+#         self.__class__.transfer_calls = 0
+#
+#     @classmethod
+#     def transfer_plate(cls, *args, **kwargs):
+#         cls.transfer_calls += 1
+#
+#     @classmethod
+#     def reset_calls(cls):
+#         cls.transfer_calls = 0
+#
+#     @classmethod
+#     def check_calls(cls, calls):
+#         if cls.transfer_calls != calls:
+#             raise Exception("Calls expected {} got {}".format(calls, cls.transfer_calls))
 
 
-def test_instance_creation(robot):
-    assert robot
+# @pytest.fixture
+# @patch.object(Movement, "__init__", FakeMovement.__init__)
+# @patch.object(EvaHelper, "connect")
+# def robot(mock_connect):
+#     _robot = Robot(eva_ip_address=FAKE_IP_ADDRESS, token=FAKE_TOKEN, logger=fake_logger)
+#     return _robot
 
 
-def test_pickup_plate_position_is_saved(robot):
-    robot.pick_up_plate(PICK_POS1, PLATE_NAME1)
-    assert robot._pickup_pos == PICK_POS1
+class ManagerPlateTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self._eva_helper_patcher = patch("RobotManager.robot_manager.robot.EvaHelper")
+        self._movement_patcher = patch("RobotManager.robot_manager.robot.Movement")
+        self._mock_eh = self._eva_helper_patcher.start()
+        self._mock_movement = self._movement_patcher.start()
+        self._r = Robot(FAKE_IP_ADDRESS, FAKE_TOKEN)
 
+    def tearDown(self) -> None:
+        self._mock_eh.stop()
+        self._mock_movement.stop()
 
-def test_pickup_plate_name_is_saved(robot):
-    robot.pick_up_plate(PICK_POS1, PLATE_NAME1)
-    assert robot._plate == PLATE_NAME1
+    def test_instance_creation(self):
+        assert self._r
 
+    def test_pickup_is_executed(self):
+        self._r.pick_up_plate(PICK_POS1)
+        self._mock_movement().pick_plate.assert_called()
 
-def test_drop_plate_position_is_saved(robot):
-    robot.drop_plate(DROP_POS1, PLATE_NAME1)
-    assert robot._drop_pos == DROP_POS1
-
-
-def test_drop_plate_name_is_saved(robot):
-    robot.drop_plate(DROP_POS1, PLATE_NAME1)
-    assert robot._plate == PLATE_NAME1
-
-
-def test_error_if_multiple_pickup(robot):
-    robot.pick_up_plate(PICK_POS1, PLATE_NAME1)
-    with pytest.raises(RobotException):
-        robot.pick_up_plate(PICK_POS1, PLATE_NAME2)
-
-
-def test_error_if_multiple_drop(robot):
-    robot.drop_plate(PICK_POS1, PLATE_NAME1)
-    with pytest.raises(RobotException):
-        robot.drop_plate(PICK_POS1, PLATE_NAME2)
-
-
-## Test using the movement mock
-@patch.object(Movement, "transfer_plate", FakeMovement.transfer_plate)
-def test_plate_not_transferred_pickup(robot):
-    FakeMovement.reset_calls()
-    robot.pick_up_plate(PICK_POS1, PLATE_NAME1)
-    FakeMovement.check_calls(0)
-
-
-@patch.object(Movement, "transfer_plate", FakeMovement.transfer_plate)
-def test_plate_not_transferred_drop(robot):
-    FakeMovement.reset_calls()
-    robot.drop_plate(DROP_POS1, PLATE_NAME1)
-    FakeMovement.check_calls(0)
-
-
-@patch.object(Movement, "transfer_plate", FakeMovement.transfer_plate)
-def test_complete_transfer(robot):
-    FakeMovement.reset_calls()
-    robot.pick_up_plate(PICK_POS1, PLATE_NAME1)
-    robot.drop_plate(DROP_POS1, PLATE_NAME1)
-    FakeMovement.check_calls(1)
-
-
-@pytest.fixture
-@patch.object(Movement, "transfer_plate", FakeMovement.transfer_plate)
-def complete_transfer(robot):
-    robot.pick_up_plate(PICK_POS1, PLATE_NAME1)
-    robot.drop_plate(DROP_POS1, PLATE_NAME1)
-
-
-def test_plate_is_cleared_after_completion(robot, complete_transfer):
-    assert robot._plate is None
-
-
-def test_pick_pos_is_cleared_after_completion(robot, complete_transfer):
-    assert robot._pickup_pos is None
-
-
-def test_drop_pos_is_cleared_after_completion(robot, complete_transfer):
-    assert robot._pickup_pos is None
-
-@patch.object(Movement, "transfer_plate", FakeMovement.transfer_plate)
-def test_two_transfers(robot):
-    FakeMovement.reset_calls()
-    robot.pick_up_plate(PICK_POS1, PLATE_NAME1)
-    robot.drop_plate(DROP_POS1, PLATE_NAME1)
-    robot.pick_up_plate(PICK_POS2, PLATE_NAME2)
-    robot.drop_plate(DROP_POS2, PLATE_NAME2)
-    FakeMovement.check_calls(2)
+    def test_drop_is_executed(self):
+        self._r.drop_plate(DROP_POS1)
+        self._mock_movement().drop_plate.assert_called()
 
