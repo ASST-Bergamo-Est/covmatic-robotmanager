@@ -20,7 +20,6 @@ class RobotManagerApi(Api):
         robot_manager.shutdown()
 
 
-
 class Version(Resource):
     def get(self):
         return {

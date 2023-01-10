@@ -21,42 +21,6 @@ PLATE_NAME1 = "REAGENT"
 PLATE_NAME2 = "WASH"
 
 
-# class FakeEvaHelper:
-#     def __init__(self):
-#         pass
-#
-#     def connect(self, *args, **kwargs):
-#         pass
-#
-#
-# class FakeMovement:
-#     transfer_calls = 0
-#
-#     def __init__(self):
-#         self.__class__.transfer_calls = 0
-#
-#     @classmethod
-#     def transfer_plate(cls, *args, **kwargs):
-#         cls.transfer_calls += 1
-#
-#     @classmethod
-#     def reset_calls(cls):
-#         cls.transfer_calls = 0
-#
-#     @classmethod
-#     def check_calls(cls, calls):
-#         if cls.transfer_calls != calls:
-#             raise Exception("Calls expected {} got {}".format(calls, cls.transfer_calls))
-
-
-# @pytest.fixture
-# @patch.object(Movement, "__init__", FakeMovement.__init__)
-# @patch.object(EvaHelper, "connect")
-# def robot(mock_connect):
-#     _robot = Robot(eva_ip_address=FAKE_IP_ADDRESS, token=FAKE_TOKEN, logger=fake_logger)
-#     return _robot
-
-
 class ManagerPlateTest(unittest.TestCase):
     def setUp(self) -> None:
         self._eva_helper_patcher = patch("RobotManager.robot_manager.robot.EvaHelper")
