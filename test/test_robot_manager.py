@@ -1,6 +1,5 @@
 import unittest
-
-from mock import patch
+from unittest.mock import patch
 
 from src.covmatic_robotmanager.robot import RobotException
 from src.covmatic_robotmanager.robot_manager import RobotManager

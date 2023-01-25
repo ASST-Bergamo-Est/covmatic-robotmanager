@@ -1,2 +1,2 @@
 # RobotManager
-Manager code nfor EVA robot from Automata.
+Manager code for EVA robot from Automata.

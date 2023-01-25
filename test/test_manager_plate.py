@@ -1,9 +1,9 @@
 import logging
 import unittest
+from unittest.mock import patch
 
 from src.covmatic_robotmanager.movement import MovementException
 from src.covmatic_robotmanager.robot import Robot, RobotException
-from mock import patch
 
 FAKE_IP_ADDRESS = "fakeipaddress"
 FAKE_TOKEN = "faketoken"
