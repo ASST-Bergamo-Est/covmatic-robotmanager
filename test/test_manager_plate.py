@@ -1,13 +1,9 @@
 import logging
 import unittest
 
-import pytest
-
-from ..robot_manager.movement import MovementException
-from ..robot_manager.robot import Movement
-from ..robot_manager.robot import Robot, RobotException
-from ..robot_manager.EvaHelper import EvaHelper
-from mock import patch, Mock
+from src.covmatic_robotmanager.movement import MovementException
+from src.covmatic_robotmanager.robot import Robot, RobotException
+from mock import patch
 
 FAKE_IP_ADDRESS = "fakeipaddress"
 FAKE_TOKEN = "faketoken"
@@ -23,8 +19,8 @@ PLATE_NAME2 = "WASH"
 
 class ManagerPlateTest(unittest.TestCase):
     def setUp(self) -> None:
-        self._eva_helper_patcher = patch("RobotManager.robot_manager.robot.EvaHelper")
-        self._movement_patcher = patch("RobotManager.robot_manager.robot.Movement")
+        self._eva_helper_patcher = patch("src.covmatic_robotmanager.robot.EvaHelper")
+        self._movement_patcher = patch("src.covmatic_robotmanager.robot.Movement")
         self._mock_eh = self._eva_helper_patcher.start()
         self._mock_movement = self._movement_patcher.start()
         self._r = Robot(FAKE_IP_ADDRESS, FAKE_TOKEN)

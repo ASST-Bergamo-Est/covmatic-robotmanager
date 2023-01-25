@@ -1,10 +1,9 @@
 import unittest
 
-import pytest
-from mock import Mock, patch
+from mock import patch
 
-from ..robot_manager.robot import RobotException
-from ..robot_manager.robot_manager import RobotManager, Robot, RobotManagerException
+from src.covmatic_robotmanager.robot import RobotException
+from src.covmatic_robotmanager.robot_manager import RobotManager
 
 PICK_ACTION = "pick"
 DROP_ACTION = "drop"
@@ -57,7 +56,7 @@ drop_action2 = {
 class TestRobotManager(unittest.TestCase):
     """ Base class to subclass for test execution """
     def setUp(self) -> None:
-        self._robot_patcher = patch("RobotManager.robot_manager.robot_manager.Robot")
+        self._robot_patcher = patch("src.covmatic_robotmanager.robot_manager.Robot")
         self._mock_robot = self._robot_patcher.start()
         self._rm = RobotManager()
 

@@ -1,7 +1,7 @@
 import logging
 import time
 
-from robot_manager.EvaHelper import EvaHelper
+from src.covmatic_robotmanager.EvaHelper import EvaHelper
 
 GRIPPER_HAS_PLATE_LOW_THRESHOLD = 1.0
 GRIPPER_HAS_PLATE_HIGH_THRESHOLD = 5.0
