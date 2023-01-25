@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/RobotManager.iml" filepath="$PROJECT_DIR$/.idea/RobotManager.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/covmatic-robotmanager.iml" filepath="$PROJECT_DIR$/.idea/covmatic-robotmanager.iml" />
     </modules>
   </component>
 </project>
