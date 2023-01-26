@@ -19,7 +19,9 @@ dynamic = ["version"]
 
 dependencies = [
     "configargparse",
-    "evasdk"
+    "evasdk",
+    "flask",
+    "flask-restful"
 ]
 
 [project-urls]

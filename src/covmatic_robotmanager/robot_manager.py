@@ -4,7 +4,7 @@ from threading import Event, Thread
 
 from .robot import Robot, RobotException
 from .singleton import Singleton
-from . import EVA_IP_ADDRESS, EVA_TOKEN
+from .config import Config
 from queue import Queue
 import logging
 import uuid
@@ -16,7 +16,7 @@ class RobotManagerException(Exception):
 
 class RobotManager(Singleton):
     def __init__(self, logger=logging.getLogger(__name__)):
-        self._robot = Robot(eva_ip_address=EVA_IP_ADDRESS, token=EVA_TOKEN)
+        self._robot = Robot(eva_ip_address=Config().eva_ip, token=Config().eva_token)
         self._logger = logger
         self._logger.info("RobotManager initilized)")
         self._actions = []

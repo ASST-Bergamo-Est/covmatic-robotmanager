@@ -3,7 +3,6 @@
 # a simple manager to control EVA robot and provide a safe interfate to be used by others.
 
 import logging
-import time
 from enum import Enum
 
 from .movement import Movement, MovementException
