@@ -23,8 +23,8 @@ class Config(argparse.Namespace, metaclass=SingletonMeta):
         parser = configargparse.ArgParser(description=description,
                                           default_config_files=[cls.get_config_file_path()],
                                           add_config_file_help=True)
-        parser.add_argument('-E', '--eva-ip', metavar='address',  required=True, default="", help="Eva hostname or ip address")
-        parser.add_argument('-T', '--eva-token', metavar='token', required=True, default="", help="Eva token")
+        parser.add_argument('-E', '--eva-ip', metavar='address',  required=True, help="Eva hostname or ip address")
+        parser.add_argument('-T', '--eva-token', metavar='token', required=True, help="Eva token")
         parser.add_argument('-P', '--port', type=int, metavar="port", default=5000, help="Server port for requests")
         return cls.reset(**parser.parse_known_args()[0].__dict__)
 

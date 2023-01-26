@@ -1,9 +1,9 @@
 import logging
-import unittest
 from unittest.mock import patch
 
 from src.covmatic_robotmanager.movement import MovementException
 from src.covmatic_robotmanager.robot import Robot, RobotException
+from test.common import BaseTestClass
 
 FAKE_IP_ADDRESS = "fakeipaddress"
 FAKE_TOKEN = "faketoken"
@@ -17,7 +17,7 @@ PLATE_NAME1 = "REAGENT"
 PLATE_NAME2 = "WASH"
 
 
-class ManagerPlateTest(unittest.TestCase):
+class ManagerPlateTest(BaseTestClass):
     def setUp(self) -> None:
         self._eva_helper_patcher = patch("src.covmatic_robotmanager.robot.EvaHelper")
         self._movement_patcher = patch("src.covmatic_robotmanager.robot.Movement")

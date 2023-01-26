@@ -2,12 +2,15 @@
 # ============
 # a simple manager to control EVA robot and provide a safe interfate to be used by others.
 
+from .config import Config
+Config.pull(__doc__)
+
 import logging
 from flask import Flask, request
 
 from . import __version__
 from .api import RobotManagerApi
-from .config import Config
+
 
 logger = logging.getLogger(__name__)
 logger.info("Starting version {}".format(__version__))
