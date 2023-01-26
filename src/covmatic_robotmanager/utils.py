@@ -1,5 +1,5 @@
 import math
-
+from functools import partial
 
 def rad2deg(rad_list):
     return [r * 360 / (2 * math.pi) for r in rad_list]
