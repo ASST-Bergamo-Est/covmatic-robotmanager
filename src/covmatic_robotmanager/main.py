@@ -28,7 +28,8 @@ class RobotManagerApp(Flask):
     def shutdown(self):
         self._api.shutdown()
 
-def get_token(q: multiprocessing.Queue) -> None:
+
+def start_app(terminate_queue: multiprocessing.Queue) -> None:
     app = RobotManagerApp()
 
     @app.route('/shutdown', methods=['POST'])
@@ -36,7 +37,7 @@ def get_token(q: multiprocessing.Queue) -> None:
         logger.info("Shutting down app...")
         app.shutdown()
         logger.info("Releasing process for shutdown")
-        q.put("")
+        terminate_queue.put("")
         return "Shutdown complete"
 
     app.run(host='::', port=Config().port, debug=False)
@@ -44,7 +45,7 @@ def get_token(q: multiprocessing.Queue) -> None:
 
 if __name__ == '__main__':
     q = multiprocessing.Queue()
-    p = multiprocessing.Process(target=get_token, args=(q,))
+    p = multiprocessing.Process(target=start_app, args=(q,))
     logger.info("Starting server process...")
     p.start()
     logger.info("Server process {} is waiting for shutdown.".format(p.pid))
