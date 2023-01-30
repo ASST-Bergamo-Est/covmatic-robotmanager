@@ -2,6 +2,7 @@
 # ============
 # a simple manager to control EVA robot and provide a safe interfate to be used by others.
 import os
+import sys
 
 from .config import Config
 Config.pull(__doc__)
@@ -43,7 +44,7 @@ def start_app(terminate_queue: multiprocessing.Queue) -> None:
     app.run(host='::', port=Config().port, debug=False)
 
 
-if __name__ == '__main__':
+def main():
     q = multiprocessing.Queue()
     p = multiprocessing.Process(target=start_app, args=(q,))
     logger.info("Starting server process...")
@@ -53,3 +54,7 @@ if __name__ == '__main__':
     logger.info("Terminating process {}".format(p.pid))
     p.terminate()
     logger.info("Exiting")
+
+
+if __name__ == '__main__':
+    sys.exit(main())

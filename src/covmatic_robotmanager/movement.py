@@ -1,14 +1,12 @@
 # Movement class to manage approaching and moving of robot
-import json
 import logging
-import time
+import math
 
-from . import positions
 from .gripper import EvaGripper
 from .positions import Positions
 from .EvaHelper import EvaHelper
 from .toolpath import Toolpath, ToolpathExecute
-from .utils import *
+from .utils import rad2deg
 
 MAX_SPEED = 0.25       # Max speed in m/s
 
@@ -134,23 +132,6 @@ class Movement:
         self._logger.info("We've to raise of {}".format(raising_height))
         return raising_height
 
-    def test_toolpath(self):
-        tp = Toolpath(max_speed=0.05)
-        home = self.get_joints("HOMEOUT")
-        tp.add_waypoint("home", home)
-        tp.add_waypoint("home1", self.update_joints_with_rotation(home, {"x": 0.01}))
-        tp.add_waypoint("home2", self.update_joints_with_rotation(home, {"x": -0.01}))
-
-        movements = self.raise_and_detach_get_movement_list(tp, "HOMEOUT", 0.003, 0.001)
-
-        with ToolpathExecute(tp):
-            for m in movements:
-                tp.add_movement(m)
-            # tp.add_movement("home")
-            # tp.add_movement("home1")
-            # tp.add_movement("home2")
-            # tp.add_movement("home")
-
     def toolpath_raise_and_detach(self, tp, joints, z_amount: float, z_step: float, rotation_amount=0.005, max_speed=None):
         steps = math.floor(z_amount/z_step)
         movement_names = []
@@ -240,107 +221,6 @@ class Movement:
     def transfer_plate(self, source_pos, dest_pos, max_speed=None, home_after=True, detach_plate=False):
         self.pick_plate(source_pos, max_speed=max_speed, detach_plate=detach_plate)
         self.drop_plate(dest_pos, max_speed=max_speed, home_after=home_after)
-        #
-        # gripper = EvaGripper()
-        #
-        # near_height = -0.01
-        # grip_height = 0.008
-        #
-        # source_raising_height = self.get_raising_height(source_pos)
-        # dest_raising_height = self.get_raising_height(dest_pos)
-        #
-        # source_owner = self._positions.get_pos_owner(source_pos)
-        # dest_owner = self._positions.get_pos_owner(dest_pos)
-        # is_different_owner = source_owner != dest_owner
-        #
-        # self._logger.info("Source owner {}; dest owner {}; are different: {}".format(source_owner, dest_owner, is_different_owner))
-        # source_home_pos = self.get_joints("{}-HOME".format(source_owner))
-        # dest_home_pos = self.get_joints("{}-HOME".format(dest_owner))
-        # pick_pos = self.get_joints(source_pos, offset={"z": grip_height})
-        #
-        #
-        # approach_speed = 0.025
-        #
-        # self._eva_helper.check_data_emergency_stop()
-        #
-        # with self._eva.lock():
-        #     self._eva_helper.check_and_clear_errors()
-        #
-        # tp = Toolpath(max_speed=max_speed)
-        #
-        # tp.add_waypoint("pick_home", source_home_pos)
-        # tp.add_waypoint("pick_pos_up", self.get_joints(source_pos, offset={"z": source_raising_height}))
-        # tp.add_waypoint("pick_pos_near", self.get_joints(source_pos, offset={"z": near_height}))
-        # tp.add_waypoint("pick_pos", pick_pos)
-        #
-        # tp.add_waypoint("drop_home", dest_home_pos)
-        # tp.add_waypoint("drop_pos_up", self.get_joints(dest_pos, offset={"z": dest_raising_height}))
-        # tp.add_waypoint("drop_pos_near", self.get_joints(dest_pos, offset={"z": near_height}))
-        # tp.add_waypoint("drop_pos", self.get_joints(dest_pos, offset={"z": grip_height}))
-        #
-        # if home_after:
-        #     tp.add_waypoint("home", self.get_joints("HOME"))
-        #
-        # gripper.close()
-        #
-        # with ToolpathExecute(tp):
-        #     tp.add_movement("pick_home")
-        #     tp.add_movement("pick_pos_up", "linear")
-        #     tp.add_movement("pick_pos_near", "linear")
-        #
-        # gripper.open()
-        #
-        # with ToolpathExecute(tp):
-        #     tp.add_movement("pick_pos_near")
-        #     tp.add_movement("pick_pos", "linear", max_speed=approach_speed)
-        #
-        # gripper.close()
-        #
-        # with ToolpathExecute(tp):
-        #     if detach_plate:
-        #         self.toolpath_raise_and_detach(tp, pick_pos, 0.003, 0.001, max_speed=approach_speed)
-        #     else:
-        #         tp.add_movement("pick_pos")
-        #     tp.add_movement("pick_pos_near", "linear", max_speed=approach_speed)
-        #
-        # if not gripper.has_plate():
-        #     gripper.open()
-        #     with ToolpathExecute(tp):
-        #         tp.add_movement("pick_pos_near", )
-        #         tp.add_movement("pick_pos_up", "linear", max_speed=approach_speed)
-        #     gripper.close()
-        #     with ToolpathExecute(tp):
-        #         tp.add_movement("pick_pos_up")
-        #         tp.add_movement("pick_home", "linear")
-        #
-        #     raise Exception("Plate not grabbed!")
-        #
-        # with ToolpathExecute(tp):
-        #     tp.add_movement("pick_pos_near")
-        #     tp.add_movement("pick_pos_up", "linear")
-        #
-        #     if is_different_owner:
-        #         tp.add_movement("pick_home")
-        #         tp.add_movement("drop_home")
-        #
-        #     tp.add_movement("drop_pos_up")
-        #     tp.add_movement("drop_pos_near", "linear")
-        #     tp.add_movement("drop_pos", "linear", max_speed=approach_speed)
-        #
-        # gripper.open()
-        #
-        # with ToolpathExecute(tp):
-        #     tp.add_movement("drop_pos")
-        #     tp.add_movement("drop_pos_near", "linear", max_speed=approach_speed)
-        #
-        # gripper.close()
-        #
-        # with ToolpathExecute(tp):
-        #     tp.add_movement("drop_pos_near")
-        #     tp.add_movement("drop_pos_up", "linear")
-        #     tp.add_movement("drop_home", "linear")
-        #     if home_after:
-        #         tp.add_movement("home")
 
     def pick_plate(self, source_pos, max_speed=None, detach_plate=False):
 
@@ -455,57 +335,3 @@ class Movement:
             if home_after:
                 tp.add_movement("home")
 
-    def move_list(self, data: list):
-        self._logger.info("Move list called with: {}".format(data))
-
-        arguments_to_copy = ["trajectory", "max_speed"]
-
-        tp = Toolpath()
-
-        for i, d in enumerate(data):
-            if not "joints" in d:
-                raise Exception("Mandatory \'joints\' key not found in {}".format(d))
-
-            waypoint_label = "WP_{}".format(i)
-            tp.add_waypoint(waypoint_label, d["joints"])
-
-            arguments = {"label": waypoint_label}
-
-            for a in arguments_to_copy:
-                self._logger.debug("Checking argument {}".format(a))
-                if a in d:
-                    arguments[a] = d[a]
-            self._logger.debug("Arguments now are: {}".format(arguments))
-
-            tp.add_movement(**arguments)
-
-        self.toolpath_load_and_execute(tp.toolpath)
-
-    def approach_linear(self, position_name, start_height=0.1,  max_speed=0.05):
-        """ Approach in a linear way to a defined position
-            :param position_name: the name of the target position
-            :param start_height: the height above the position at which start the linear phase
-            :param max_speed: the maximum speed at which move in the linear phase
-        """
-
-        position = self.get_joints(position_name)
-        position_above = self.get_joints(position_name, offset={"z": -start_height})
-
-        moves = [{"joints": position_above},
-                 {"joints": position, "trajectory": "linear", "max_speed": max_speed}]
-
-        self.move_list(moves)
-
-    def raise_vertically(self, height, max_speed=0.05):
-        current_pos = self.get_angles()
-        updated_pos = self._eva.calc_nudge(current_pos, "z", -height)
-
-        moves = [{"joints": current_pos},
-                 {"joints": updated_pos, "trajectory": "linear", "max_speed": max_speed}]
-
-        self.move_list(moves)
-
-    # # Test toolpath output
-    # with open("test_toolpath.json", "w") as fp:
-    #     self._logger.info("{}".format(tp.toolpath))
-    #     json.dump(tp.toolpath, fp)
