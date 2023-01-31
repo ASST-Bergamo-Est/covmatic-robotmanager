@@ -37,6 +37,7 @@ class Config(argparse.Namespace, metaclass=SingletonMeta):
         parser.add_argument('-T', '--eva-token', metavar='token', required=True, help="Eva token")
         parser.add_argument('-P', '--port', type=int, metavar="port", default=5000, help="Server port for requests")
         parser.add_argument('--positions-filename', metavar="path", type=str, default="positions.json", help="Filename to save positions data")
+        parser.add_argument('--test-only', dest="test_only", action="store_true", help="enable test-only execution")
         return cls.reset(**parser.parse_known_args()[0].__dict__)
 
     @classmethod

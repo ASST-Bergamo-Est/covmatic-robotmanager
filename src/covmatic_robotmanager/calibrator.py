@@ -290,7 +290,10 @@ def main_loop():
 
 
 if __name__ == '__main__':
-    main_loop()
+    if Config().test_only:
+        logger.info("Test only run, exiting...")
+    else:
+        main_loop()
 
 
 

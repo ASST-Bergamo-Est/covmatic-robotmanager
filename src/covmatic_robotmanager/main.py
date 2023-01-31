@@ -4,6 +4,8 @@
 import os
 import sys
 
+import requests
+
 from .config import Config
 Config.pull(__doc__)
 
@@ -50,6 +52,11 @@ def main():
     logger.info("Starting server process...")
     p.start()
     logger.info("Server process {} is waiting for shutdown.".format(p.pid))
+
+    if Config().test_only:
+        logger.info("Test only run: requesting shutdown")
+        requests.post('http://localhost:{}/shutdown'.format(Config().port))
+
     token = q.get(block=True)
     logger.info("Terminating process {}".format(p.pid))
     p.terminate()
