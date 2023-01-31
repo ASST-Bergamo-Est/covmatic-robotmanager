@@ -2,14 +2,11 @@
 import os
 
 from .robot_manager import Robot
+from .config import Config
 import logging
 
 logger = logging.getLogger(__name__)
 
-# Configuration section
-EVA_IP_ADDRESS = "10.213.55.80"
-SERVER_PORT = 80
-token = '35ad1b7da935684d10afdc09a5842d5e6403b0f8'
 
 class _Getch:
     """Gets a single character from standard input.  Does not echo to the
@@ -46,6 +43,7 @@ class _GetchWindows:
     def __call__(self):
         import msvcrt
         return msvcrt.getch()
+
 
 quit_requested = False
 offset = {}
@@ -250,7 +248,9 @@ def main_loop():
     global quit_requested, initial_angles
 
     getch = _Getch()
-    robot = Robot(EVA_IP_ADDRESS, token, logger)
+
+    Config().pull("")
+    robot = Robot(Config().eva_ip, Config().eva_token, logger)
     owner = input("Insert name of target robot: ")
 
     pos_name = input("Insert name of position for robot {}: ".format(owner))
