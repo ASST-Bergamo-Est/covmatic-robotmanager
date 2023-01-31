@@ -21,7 +21,8 @@ dependencies = [
     "configargparse",
     "evasdk",
     "flask",
-    "flask-restful"
+    "flask-restful",
+    "waitress"
 ]
 
 [project-urls]

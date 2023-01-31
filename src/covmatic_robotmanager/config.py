@@ -38,6 +38,7 @@ class Config(argparse.Namespace, metaclass=SingletonMeta):
         parser.add_argument('-P', '--port', type=int, metavar="port", default=5000, help="Server port for requests")
         parser.add_argument('--positions-filepath', metavar="path", type=str, default=cls.get_default_positions_file_path(), help="JSON File to save positions data")
         parser.add_argument('--test-only', dest="test_only", action="store_true", help="enable test-only execution")
+        parser.add_argument('--debug-mode', dest="debug_mode", action="store_true", help="enable debug mode to show unhandled exceptions.")
         return cls.reset(**parser.parse_known_args()[0].__dict__)
 
     @classmethod

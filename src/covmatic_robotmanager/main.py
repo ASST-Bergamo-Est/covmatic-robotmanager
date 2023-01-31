@@ -1,18 +1,15 @@
 # RobotManager
 # ============
 # a simple manager to control EVA robot and provide a safe interfate to be used by others.
-import os
-import sys
-
-import requests
 
 from .config import Config
 Config.pull(__doc__)
 
 import logging
-from flask import Flask, request
-
+import sys
 import multiprocessing
+from flask import Flask
+from waitress import serve
 
 from . import __version__
 from .api import RobotManagerApi
@@ -42,8 +39,8 @@ def start_app(terminate_queue: multiprocessing.Queue) -> None:
         logger.info("Releasing process for shutdown")
         terminate_queue.put("")
         return "Shutdown complete"
-
-    app.run(host='::', port=Config().port, debug=False)
+    serve(app, listen="*:{}".format(Config().port), expose_tracebacks=Config().debug_mode)
+    # app.run(host='::', port=Config().port, debug=True, use_reloader=False)        # Werkezeug only for development
 
 
 def main_loop():
