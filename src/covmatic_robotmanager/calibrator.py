@@ -288,12 +288,14 @@ def main_loop():
             print("\n\nMove the robot manually to a safe position than press enter")
             wait = input()
 
-
-if __name__ == '__main__':
+def main():
     if Config().test_only:
         logger.info("Test only run, exiting...")
     else:
         main_loop()
+
+if __name__ == '__main__':
+    main()
 
 
 

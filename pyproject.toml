@@ -63,5 +63,5 @@ exclude = [
 
 [project.scripts]
 robotmanager-server = "covmatic_robotmanager.main:main"
-robotmanager-calibrator = "covmatic_robotmanager.calibrator:main_loop"
+robotmanager-calibrator = "covmatic_robotmanager.calibrator:main"
 
