@@ -37,7 +37,7 @@ jobs:
       - name: Run tests
         run: hatch run cov
 
-  simulate_scripts:
+  simulate_script:
     name: Simulate scripts with Python ${{ matrix.python-version }} on ${{ startsWith(matrix.os, 'macos-') && 'macOS' || startsWith(matrix.os, 'windows-') && 'Windows' || 'Linux' }}
     runs-on: ${{ matrix.os }}
     needs: test
