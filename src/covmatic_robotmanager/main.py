@@ -46,21 +46,23 @@ def start_app(terminate_queue: multiprocessing.Queue) -> None:
     app.run(host='::', port=Config().port, debug=False)
 
 
-def main():
+def main_loop():
     q = multiprocessing.Queue()
     p = multiprocessing.Process(target=start_app, args=(q,))
     logger.info("Starting server process...")
     p.start()
     logger.info("Server process {} is waiting for shutdown.".format(p.pid))
-
-    if Config().test_only:
-        logger.info("Test only run: requesting shutdown")
-        requests.post('http://localhost:{}/shutdown'.format(Config().port))
-
     token = q.get(block=True)
     logger.info("Terminating process {}".format(p.pid))
     p.terminate()
     logger.info("Exiting")
+
+
+def main():
+    if Config().test_only:
+        logger.info("Test only run, exiting...")
+    else:
+        main_loop()
 
 
 if __name__ == '__main__':
