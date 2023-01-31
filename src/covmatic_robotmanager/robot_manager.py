@@ -18,7 +18,7 @@ class RobotManager(Singleton):
     def __init__(self, logger=logging.getLogger(__name__)):
         self._robot = Robot(eva_ip_address=Config().eva_ip,
                             token=Config().eva_token,
-                            position_filepath=Config().get_positions_file_path())
+                            position_filepath=Config().positions_filepath)
         self._logger = logger
         self._logger.info("RobotManager initilized)")
         self._actions = []
