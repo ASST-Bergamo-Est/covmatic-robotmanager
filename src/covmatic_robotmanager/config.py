@@ -14,8 +14,18 @@ class Config(argparse.Namespace, metaclass=SingletonMeta):
     _logger = logging.getLogger(__name__)
 
     @classmethod
+    def get_base_config_folder(cls):
+        config_dir = os.path.join(os.path.expanduser("~"), ".covmatic")
+        cls.create_directory(config_dir)
+        return config_dir
+
+    @classmethod
     def get_config_file_path(cls) -> str:
-        return os.path.join(os.path.expanduser("~"), "covmatic-robotmanager.conf")
+        return os.path.join(cls.get_base_config_folder(), "robotmanager.conf")
+
+    @classmethod
+    def get_positions_file_path(cls) -> str:
+        return os.path.join(cls.get_base_config_folder(), cls().positions_filename)
 
     @classmethod
     def parse(cls, description):
@@ -26,6 +36,7 @@ class Config(argparse.Namespace, metaclass=SingletonMeta):
         parser.add_argument('-E', '--eva-ip', metavar='address',  required=True, help="Eva hostname or ip address")
         parser.add_argument('-T', '--eva-token', metavar='token', required=True, help="Eva token")
         parser.add_argument('-P', '--port', type=int, metavar="port", default=5000, help="Server port for requests")
+        parser.add_argument('--positions-filename', metavar="path", type=str, default="positions.json", help="Filename to save positions data")
         return cls.reset(**parser.parse_known_args()[0].__dict__)
 
     @classmethod
@@ -34,3 +45,10 @@ class Config(argparse.Namespace, metaclass=SingletonMeta):
             cls.parse(description)
         return cls()
 
+    @classmethod
+    def create_directory(cls, directory):
+        try:
+            os.makedirs(directory)
+            cls._logger.info("Created directory {}".format(directory))
+        except OSError:
+            cls._logger.debug("Directory {} already existing".format(directory))

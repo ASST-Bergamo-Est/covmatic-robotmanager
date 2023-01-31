@@ -1,9 +1,12 @@
 # Save a robot position
-import os
 
-from .robot_manager import Robot
 from .config import Config
+Config().pull("")
+
+import os
+from .robot_manager import Robot
 import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -249,7 +252,6 @@ def main_loop():
 
     getch = _Getch()
 
-    Config().pull("")
     robot = Robot(Config().eva_ip, Config().eva_token, logger)
     owner = input("Insert name of target robot: ")
 

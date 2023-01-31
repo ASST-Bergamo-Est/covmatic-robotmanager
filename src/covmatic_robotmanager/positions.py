@@ -2,14 +2,13 @@
 import json
 import os
 import logging
-
-POSITIONS_FILE = 'positions.json'
-
+from .config import Config
 
 class Positions:
-    def __init__(self, positions_file_path: str = POSITIONS_FILE, logger=logging.getLogger(__name__)):
+    def __init__(self,
+                 positions_file_path: str = Config().get_positions_file_path(),
+                 logger=logging.getLogger(__name__)):
         self._logger = logger
-
         self._abs_path = os.path.abspath(positions_file_path)
         self._logger.info("Checking path {}...".format(self._abs_path))
 
