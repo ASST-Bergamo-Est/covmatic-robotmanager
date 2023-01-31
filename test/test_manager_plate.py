@@ -7,6 +7,7 @@ from test.common import BaseTestClass
 
 FAKE_IP_ADDRESS = "fakeipaddress"
 FAKE_TOKEN = "faketoken"
+FAKE_POSITION_FILE = "position.json"
 fake_logger = logging.getLogger()
 
 PICK_POS1 = "OT1-SLOT1"
@@ -23,7 +24,7 @@ class ManagerPlateTest(BaseTestClass):
         self._movement_patcher = patch("src.covmatic_robotmanager.robot.Movement")
         self._mock_eh = self._eva_helper_patcher.start()
         self._mock_movement = self._movement_patcher.start()
-        self._r = Robot(FAKE_IP_ADDRESS, FAKE_TOKEN)
+        self._r = Robot(FAKE_IP_ADDRESS, FAKE_TOKEN, FAKE_POSITION_FILE)
 
     def tearDown(self) -> None:
         self._mock_eh.stop()

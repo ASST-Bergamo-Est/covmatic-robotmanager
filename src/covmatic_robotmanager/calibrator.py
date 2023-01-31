@@ -252,7 +252,7 @@ def main_loop():
 
     getch = _Getch()
 
-    robot = Robot(Config().eva_ip, Config().eva_token, logger)
+    robot = Robot(Config().eva_ip, Config().eva_token, Config().get_positions_file_path(), logger)
     owner = input("Insert name of target robot: ")
 
     pos_name = input("Insert name of position for robot {}: ".format(owner))

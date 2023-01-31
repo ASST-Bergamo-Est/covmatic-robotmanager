@@ -2,11 +2,11 @@
 import json
 import os
 import logging
-from .config import Config
+
 
 class Positions:
     def __init__(self,
-                 positions_file_path: str = Config().get_positions_file_path(),
+                 positions_file_path: str,
                  logger=logging.getLogger(__name__)):
         self._logger = logger
         self._abs_path = os.path.abspath(positions_file_path)

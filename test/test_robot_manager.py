@@ -57,11 +57,14 @@ class TestRobotManager(BaseTestClass):
     def setUp(self) -> None:
         self._robot_patcher = patch("src.covmatic_robotmanager.robot_manager.Robot")
         self._mock_robot = self._robot_patcher.start()
+        self._config_patcher = patch("src.covmatic_robotmanager.robot_manager.Config")
+        self._mock_config = self._config_patcher.start()
         self._rm = RobotManager()
 
     def tearDown(self) -> None:
         self._rm.shutdown()
         self._robot_patcher.stop()
+        self._config_patcher.stop()
 
 
 class TestBasicActions(TestRobotManager):
