@@ -248,6 +248,9 @@ class Movement:
         tp.add_waypoint("pick_pos_near", self.get_joints(source_pos, offset={"z": near_height}))
         tp.add_waypoint("pick_pos", pick_pos)
 
+        if home_after:
+            tp.add_waypoint("home", self.get_joints("HOME"))
+
         gripper.close()
 
         with ToolpathExecute(tp):

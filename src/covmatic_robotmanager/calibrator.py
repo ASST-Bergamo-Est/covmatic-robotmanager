@@ -236,6 +236,7 @@ def check_position_exist_and_load(r: Robot, position):
         initial_angles = r._movement._positions.get_joints(position)
         answer = input("Saved position found! Do you want to move the robot to it? (y/n) ")
         if answer == "y":
+            r._movement.go_to_position("{}-HOME".format(r._movement._positions.get_pos_owner(position)), 0.1)
             r._movement.move_to_position_from_current(position, 0.05)
     except Exception as e:
         print("Error found in retrieving position {}: {}".format(position, e))
@@ -283,6 +284,7 @@ def main_loop():
             print("Received {};".format(ch))
         try:
             robot._movement.move_to_home_from_current(robot._movement._positions.get_pos_owner(pos_name), 0.1)
+            robot._movement.go_to_position("HOME")
         except Exception as e:
             print("Receive exception while trying to move home: {}".format(e))
             print("\n\nMove the robot manually to a safe position than press enter")
