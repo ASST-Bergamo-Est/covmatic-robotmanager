@@ -219,10 +219,10 @@ class Movement:
             tp.add_movement("target", "linear", max_speed=approach_speed)
 
     def transfer_plate(self, source_pos, dest_pos, max_speed=None, home_after=True, detach_plate=False):
-        self.pick_plate(source_pos, max_speed=max_speed, detach_plate=detach_plate)
+        self.pick_plate(source_pos, max_speed=max_speed, detach_plate=detach_plate, home_after=home_after)
         self.drop_plate(dest_pos, max_speed=max_speed, home_after=home_after)
 
-    def pick_plate(self, source_pos, max_speed=None, detach_plate=False):
+    def pick_plate(self, source_pos, max_speed=None, detach_plate=False, home_after=True):
 
         gripper = EvaGripper()
 
@@ -286,6 +286,8 @@ class Movement:
             tp.add_movement("pick_pos_near")
             tp.add_movement("pick_pos_up", "linear")
             tp.add_movement("pick_home", "linear")
+            if home_after:
+                tp.add_movement("home")
 
     def drop_plate(self, dest_pos, max_speed=None, home_after=True):
 
