@@ -98,14 +98,26 @@ class TestActionScheduler(TestRobotManager):
     def test_action_scheduler_pick_action_call_robot(self):
         self._rm._actions.append(pick_action1)
         self._rm.action_scheduler()
-        self._mock_robot().pick_up_plate.assert_called_once()
+        self._mock_robot().pick_up_plate.assert_not_called()
 
-
-    def test_action_scheduler_pick_set_plate(self):
+    def test_action_scheduler_pick_action_called(self):
         self._rm._actions.append(pick_action1)
         self._rm.action_scheduler()
+        self._rm._actions.append(drop_action1)
+        self._rm.action_scheduler()
+        self._mock_robot().pick_up_plate.assert_called_once()
 
-        assert self._rm._current_plate == pick_action1["plate_name"]
+    def test_action_scheduler_pick_action_called_different_input_order(self):
+        self._rm._actions.append(pick_action1)
+        self._rm._actions.append(drop_action1)
+        self._rm.action_scheduler()
+        self._mock_robot().pick_up_plate.assert_called_once()
+
+    # def test_action_scheduler_pick_set_plate(self):
+    #     self._rm._actions.append(pick_action1)
+    #     self._rm.action_scheduler()
+    #
+    #     assert self._rm._current_plate == pick_action1["plate_name"]
 
     def test_action_scheduler_drop_action_do_nothing_on_state(self):
         self._rm._actions.append(drop_action1)
@@ -138,6 +150,7 @@ class TestActionScheduler(TestRobotManager):
         self._rm._actions.append(drop_action1)
         self._rm.action_scheduler()
 
+        assert pick_action1 not in self._rm._actions
         assert drop_action1 not in self._rm._actions
 
     def test_undone_action_is_present(self):
@@ -158,19 +171,23 @@ class TestActionScheduler(TestRobotManager):
         assert pick_action2 in self._rm._actions
 
     def test_pick_different_plate_plate_not_modified(self):
+
         self._rm._actions.append(pick_action1)
         self._rm.action_scheduler()
 
         self._rm._actions.append(pick_action2)
+        self._rm._actions.append(drop_action1)
         self._rm.action_scheduler()
 
-        assert self._rm._current_plate == pick_action1["plate_name"]
+        assert self._rm._current_plate is None
 
     def test_error_during_action_clear_states(self):
         self._mock_robot().pick_up_plate.side_effect = RobotException("Test")
         self._rm._actions.append(pick_action1)
+        self._rm._actions.append(drop_action1)
         self._rm.action_scheduler()
         self.assertIs(self._rm._current_plate, ERROR_PLATE_CODE)
+
 
 class TestCheckAction(TestRobotManager):
 

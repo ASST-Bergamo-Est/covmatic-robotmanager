@@ -60,25 +60,38 @@ class RobotManager(Singleton):
     def action_scheduler(self):
         done_actions = []
         self._logger.info("Scheduler: actions are {}".format(self._actions))
-        for i, a in enumerate(self._actions):
-            print("\nevaluating {}".format(a))
-            print("current_plate: {}".format(self._current_plate))
 
-            if a["action"] == "pick" and self._current_plate is None:
-                self._current_plate = a["plate_name"]
-                self.execute_action(a)
-                done_actions.append(a)
+        pick_plate_names = map(lambda y: y['plate_name'], filter(lambda x: x['action'] == 'pick', self._actions))
+        drop_plate_names = map(lambda y: y['plate_name'], filter(lambda x: x['action'] == 'drop', self._actions))
+        print("pick: {}".format(list(pick_plate_names)))
+        print("drop: {}".format(list(drop_plate_names)))
 
-            if a["action"] == "drop" \
-                    and a["plate_name"] == self._current_plate:
-                print("Drop plate!")
-                self.execute_action(a)
-                self._current_plate = None
-                done_actions.append(a)
-            print("Ended cycle {}; actions: {}".format(i, self._actions))
+        while True:
+            pick_plate_names = map(lambda y: y['plate_name'], filter(lambda x: x['action'] == 'pick', self._actions))
+            drop_plate_names = map(lambda y: y['plate_name'], filter(lambda x: x['action'] == 'drop', self._actions))
 
-        for da in done_actions:
-            self._actions.remove(da)
+            a = None
+            if self._current_plate is None:         # We can pick a plate
+                for p in pick_plate_names:
+                    if p in drop_plate_names:
+                        a = list(filter(lambda x: x['action'] == 'pick' and x['plate_name'] == p, self._actions))[0]
+                        self._current_plate = p
+                        break
+            else:
+                if self._current_plate in drop_plate_names:
+                    a = list(filter(lambda x: x['action'] == 'drop' and x['plate_name'] == self._current_plate, self._actions))[0]
+                    self._current_plate = None
+
+            if a is None:
+                break
+
+            self._logger.info("Scheduler executing action: {}".format(a))
+            self.execute_action(a)
+
+            self._logger.info("Removing action {} from list".format(a))
+            self.remove_action(a)
+
+            self._logger.debug("Now actions are: {}".format(self._actions))
 
     def execute_action(self, a):
         action = a["action"]
@@ -94,6 +107,16 @@ class RobotManager(Singleton):
         except RobotException as e:
             self._logger.error("Error from robot during action: {}".format(e))
             self.error_handler()
+
+    def remove_action(self, action):
+        for a in self._actions:
+            if a['id'] == action['id']:
+                to_delete = a
+                break
+        else:
+            raise RobotManagerException("Action {} not found in action list".format(action))
+
+        self._actions.remove(to_delete)
 
     def action_processor_thread(self):
         self._logger.info("Entered action processor thread")
