@@ -321,7 +321,7 @@ class Movement:
 
         with ToolpathExecute(tp):
             tp.add_movement("drop_home")
-            tp.add_movement("drop_pos_up")
+            tp.add_movement("drop_pos_up", "linear")
             tp.add_movement("drop_pos_near", "linear")
             tp.add_movement("drop_pos", "linear", max_speed=approach_speed)
 
