@@ -39,10 +39,10 @@ class Robot:
     def transfer_plate(self, source_pos, dest_pos, max_speed=None, detach_plate=False):
         self._movement.transfer_plate(source_pos, dest_pos, max_speed, detach_plate=detach_plate)
 
-    def pick_up_plate(self, position):
+    def pick_up_plate(self, position, same_machine: bool = False):
         self._logger.info("Requested pickup from {}".format(position))
         try:
-            self._movement.pick_plate(position)
+            self._movement.pick_plate(position, same_machine=same_machine)
         except MovementException as e:
             self._logger.error("Exception during pickup: {}".format(e))
             raise RobotException(str(e))

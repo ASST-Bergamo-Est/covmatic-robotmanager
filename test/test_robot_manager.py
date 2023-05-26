@@ -44,6 +44,13 @@ drop_action1 = {
     'id': "2"
 }
 
+drop_action1_different_machine = {
+    'action': DROP_ACTION,
+    'position': POSITION2,
+    'plate_name': PLATE1,
+    'id': "2"
+}
+
 drop_action2 = {
     'action': DROP_ACTION,
     'position': POSITION2,
@@ -87,6 +94,7 @@ class TestBasicActions(TestRobotManager):
         id1 = self._rm.action_request(PICK_ACTION, MACHINE1, SLOT1, PLATE1)
         id2 = self._rm.action_request(DROP_ACTION, MACHINE1, SLOT1, PLATE1)
         self.assertNotEqual(id1, id2)
+
 
 class TestActionScheduler(TestRobotManager):
     def test_action_scheduler_empty_queue(self):
@@ -187,6 +195,44 @@ class TestActionScheduler(TestRobotManager):
         self._rm._actions.append(drop_action1)
         self._rm.action_scheduler()
         self.assertIs(self._rm._current_plate, ERROR_PLATE_CODE)
+
+
+class TestPickDropSameMachine(TestRobotManager):
+    def test_check_default_value(self):
+        self.assertFalse(self._rm._pick_drop_same_machine)
+
+    def test_pick_different_machines(self):
+        self._rm._actions.append(pick_action1)
+        self._rm._actions.append(drop_action1_different_machine)
+        self._rm.action_scheduler()
+        self._mock_robot().pick_up_plate.assert_called_with(POSITION1, False)
+
+    def test_pick_same_machine(self):
+        self._rm._actions.append(pick_action1)
+        self._rm._actions.append(drop_action1)
+        self._rm.action_scheduler()
+        self._mock_robot().pick_up_plate.assert_called_with(POSITION1, True)
+
+    def test_drop_different_machines(self):
+        self._rm._actions.append(pick_action1)
+        self._rm._actions.append(drop_action1_different_machine)
+        self._rm.action_scheduler()     # pick action executed
+        self._rm.action_scheduler()     # drop action executed
+        self._mock_robot().drop_plate.assert_called_with(POSITION2, False)
+
+    def test_drop_same_machine(self):
+        self._rm._actions.append(pick_action1)
+        self._rm._actions.append(drop_action1)
+        self._rm.action_scheduler()     # pick action executed
+        self._rm.action_scheduler()     # drop action executed
+        self._mock_robot().drop_plate.assert_called_with(POSITION1, True)
+
+    def test_parameter_reset_after_drop(self):
+        self._rm._actions.append(pick_action1)
+        self._rm._actions.append(drop_action1)
+        self._rm.action_scheduler()     # pick action executed
+        self._rm.action_scheduler()     # drop action executed
+        self.assertFalse(self._rm._pick_drop_same_machine)
 
 
 class TestCheckAction(TestRobotManager):

@@ -222,7 +222,7 @@ class Movement:
         self.pick_plate(source_pos, max_speed=max_speed, detach_plate=detach_plate, home_after=home_after)
         self.drop_plate(dest_pos, max_speed=max_speed, home_after=home_after)
 
-    def pick_plate(self, source_pos, max_speed=None, detach_plate=False, home_after=True):
+    def pick_plate(self, source_pos, max_speed=None, detach_plate=False, home_after=True, same_machine=False):
 
         gripper = EvaGripper()
 
@@ -288,11 +288,12 @@ class Movement:
         with ToolpathExecute(tp):
             tp.add_movement("pick_pos_near")
             tp.add_movement("pick_pos_up", "linear")
-            tp.add_movement("pick_home", "linear")
-            if home_after:
-                tp.add_movement("home")
+            if not same_machine:
+                tp.add_movement("pick_home", "linear")
+                if home_after:
+                    tp.add_movement("home")
 
-    def drop_plate(self, dest_pos, max_speed=None, home_after=True):
+    def drop_plate(self, dest_pos, max_speed=None, home_after=True, same_machine=False):
 
         gripper = EvaGripper()
 
@@ -320,7 +321,8 @@ class Movement:
             tp.add_waypoint("home", self.get_joints("HOME"))
 
         with ToolpathExecute(tp):
-            tp.add_movement("drop_home")
+            if not same_machine:
+                tp.add_movement("drop_home")
             tp.add_movement("drop_pos_up", "linear")
             tp.add_movement("drop_pos_near", "linear")
             tp.add_movement("drop_pos", "linear", max_speed=approach_speed)

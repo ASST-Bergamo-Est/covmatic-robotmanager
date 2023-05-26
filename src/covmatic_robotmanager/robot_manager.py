@@ -23,6 +23,7 @@ class RobotManager(Singleton):
         self._logger.info("RobotManager initilized)")
         self._actions = []
         self._current_plate = None
+        self._pick_drop_same_machine = False
         self._actions_queue = Queue()
         self._kill_event = Event()
         self._threads = []
@@ -35,8 +36,16 @@ class RobotManager(Singleton):
             self._logger.info("Starting thread {}".format(th.name))
             th.start()
 
+    @staticmethod
+    def get_position(machine: str, slot: str) -> str:
+        return "{}-{}".format(machine, slot)
+
+    @staticmethod
+    def get_machine_from_position(position: str) -> str:
+        return position.split('-')[0]
+
     def action_request(self, action, machine, slot, plate_name, options=None):
-        position = "{}-{}".format(machine, slot)
+        position = self.get_position(machine, slot)
         self._logger.info("Requested action {} for {} plate {}".format(action, position, plate_name))
         action_id = str(uuid.uuid4())
         action_element = {
@@ -74,8 +83,14 @@ class RobotManager(Singleton):
             if self._current_plate is None:         # We can pick a plate
                 for p in pick_plate_names:
                     if p in drop_plate_names:
-                        a = list(filter(lambda x: x['action'] == 'pick' and x['plate_name'] == p, self._actions))[0]
+                        a_pick = list(filter(lambda x: x['action'] == 'pick' and x['plate_name'] == p, self._actions))[0]
+                        a_drop = list(filter(lambda x: x['action'] == 'drop' and x['plate_name'] == p, self._actions))[0]
+                        a = a_pick
+
+                        self._pick_drop_same_machine = (a_pick['position'] == a_drop['position'])
+                        self._logger.debug("Pick and drop in same machine: {}".format(self._pick_drop_same_machine))
                         self._current_plate = p
+
                         break
             else:
                 if self._current_plate in drop_plate_names:
@@ -99,9 +114,10 @@ class RobotManager(Singleton):
         self._logger.info("Executing action {} position {}".format(action, position))
         try:
             if action == "pick":
-                self._robot.pick_up_plate(position)
+                self._robot.pick_up_plate(position, self._pick_drop_same_machine)
             elif action == "drop":
-                self._robot.drop_plate(position)
+                self._robot.drop_plate(position, self._pick_drop_same_machine)
+                self._pick_drop_same_machine = False
             else:
                 raise RobotManagerException("Action {} not implemented".format(action))
         except RobotException as e:

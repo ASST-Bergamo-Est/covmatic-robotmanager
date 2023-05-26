@@ -1,5 +1,4 @@
 import unittest
-
 from src.covmatic_robotmanager.config import Config
 
 
