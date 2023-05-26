@@ -47,10 +47,10 @@ class Robot:
             self._logger.error("Exception during pickup: {}".format(e))
             raise RobotException(str(e))
 
-    def drop_plate(self, position):
+    def drop_plate(self, position, same_machine: bool = False):
         self._logger.info("Requested drop to {}".format(position))
         try:
-            self._movement.drop_plate(position)
+            self._movement.drop_plate(position, same_machine=same_machine)
         except MovementException as e:
             self._logger.error("Exception during pickup: {}".format(e))
             raise RobotException(str(e))
