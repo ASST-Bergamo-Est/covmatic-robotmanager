@@ -9,14 +9,16 @@ DROP_ACTION = "drop"
 
 MACHINE1 = "OT1"
 SLOT1 = "SLOT1"
-POSITION1 = "{}-{}".format(MACHINE1, SLOT1)
 PLATE1 = "PLATE1"
 
 
 MACHINE2 = "OT2"
 SLOT2 = "SLOT2"
-POSITION2 = "{}-{}".format(MACHINE2, SLOT2)
 PLATE2 = "PLATE2"
+
+MAC_1_SLOT_1 = "{}-{}".format(MACHINE1, SLOT1)
+MAC_1_SLOT_2 = "{}-{}".format(MACHINE1, SLOT2)
+MAC_2_SLOT_2 = "{}-{}".format(MACHINE2, SLOT2)
 
 ERROR_PLATE_CODE = "ERROR"
 
@@ -25,35 +27,43 @@ FAKE_ACTION_ID = "fakeaction"
 
 pick_action1 = {
         'action': PICK_ACTION,
-        'position': POSITION1,
+        'position': MAC_1_SLOT_1,
         'plate_name': PLATE1,
         'id': "0"
     }
 
 pick_action2 = {
         'action': PICK_ACTION,
-        'position': POSITION2,
+        'position': MAC_2_SLOT_2,
         'plate_name': PLATE2,
         'id': "1"
     }
 
 drop_action1 = {
     'action': DROP_ACTION,
-    'position': POSITION1,
+    'position': MAC_1_SLOT_1,
     'plate_name': PLATE1,
     'id': "2"
 }
 
 drop_action1_different_machine = {
     'action': DROP_ACTION,
-    'position': POSITION2,
+    'position': MAC_2_SLOT_2,
     'plate_name': PLATE1,
     'id': "2"
 }
 
+drop_action1_same_machine_different_slot = {
+    'action': DROP_ACTION,
+    'position': MAC_1_SLOT_2,
+    'plate_name': PLATE1,
+    'id': "2"
+}
+
+
 drop_action2 = {
     'action': DROP_ACTION,
-    'position': POSITION2,
+    'position': MAC_2_SLOT_2,
     'plate_name': PLATE2,
     'id': "3"
 }
@@ -205,27 +215,34 @@ class TestPickDropSameMachine(TestRobotManager):
         self._rm._actions.append(pick_action1)
         self._rm._actions.append(drop_action1_different_machine)
         self._rm.action_scheduler()
-        self._mock_robot().pick_up_plate.assert_called_with(POSITION1, False)
+        self._mock_robot().pick_up_plate.assert_called_with(MAC_1_SLOT_1, False)
 
     def test_pick_same_machine(self):
         self._rm._actions.append(pick_action1)
         self._rm._actions.append(drop_action1)
         self._rm.action_scheduler()
-        self._mock_robot().pick_up_plate.assert_called_with(POSITION1, True)
+        self._mock_robot().pick_up_plate.assert_called_with(MAC_1_SLOT_1, True)
 
     def test_drop_different_machines(self):
         self._rm._actions.append(pick_action1)
         self._rm._actions.append(drop_action1_different_machine)
         self._rm.action_scheduler()     # pick action executed
         self._rm.action_scheduler()     # drop action executed
-        self._mock_robot().drop_plate.assert_called_with(POSITION2, False)
+        self._mock_robot().drop_plate.assert_called_with(MAC_2_SLOT_2, False)
 
-    def test_drop_same_machine(self):
+    def test_drop_same_machine_same_slot(self):
         self._rm._actions.append(pick_action1)
         self._rm._actions.append(drop_action1)
         self._rm.action_scheduler()     # pick action executed
         self._rm.action_scheduler()     # drop action executed
-        self._mock_robot().drop_plate.assert_called_with(POSITION1, True)
+        self._mock_robot().drop_plate.assert_called_with(MAC_1_SLOT_1, True)
+
+    def test_drop_same_machine_different_slot(self):
+        self._rm._actions.append(pick_action1)
+        self._rm._actions.append(drop_action1_same_machine_different_slot)
+        self._rm.action_scheduler()     # pick action executed
+        self._rm.action_scheduler()     # drop action executed
+        self._mock_robot().drop_plate.assert_called_with(MAC_1_SLOT_2, True)
 
     def test_parameter_reset_after_drop(self):
         self._rm._actions.append(pick_action1)

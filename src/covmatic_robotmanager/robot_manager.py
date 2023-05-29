@@ -87,8 +87,8 @@ class RobotManager(Singleton):
                         a_drop = list(filter(lambda x: x['action'] == 'drop' and x['plate_name'] == p, self._actions))[0]
                         a = a_pick
 
-                        self._pick_drop_same_machine = (a_pick['position'] == a_drop['position'])
-                        self._logger.debug("Pick and drop in same machine: {}".format(self._pick_drop_same_machine))
+                        self._pick_drop_same_machine = (self.get_machine_from_position(a_pick['position']) == self.get_machine_from_position(a_drop['position']))
+                        self._logger.debug("Pick drop same machine set to: {}".format(self._pick_drop_same_machine))
                         self._current_plate = p
 
                         break
@@ -112,6 +112,7 @@ class RobotManager(Singleton):
         action = a["action"]
         position = a["position"]
         self._logger.info("Executing action {} position {}".format(action, position))
+        self._logger.info("Pick Drop same machine is: {}".format(self._pick_drop_same_machine))
         try:
             if action == "pick":
                 self._robot.pick_up_plate(position, self._pick_drop_same_machine)
