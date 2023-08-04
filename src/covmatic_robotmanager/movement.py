@@ -21,7 +21,7 @@ class MovementException(Exception):
 
 
 class Movement:
-    def __init__(self, position_filepath: str, logger=logging.getLogger(__name__)):
+    def __init__(self, position_filepath: str, logger=logging.getLogger("robotmanager.movement")):
         self._eva = EvaHelper().eva
         self._positions = Positions(position_filepath)
         self._logger = logger

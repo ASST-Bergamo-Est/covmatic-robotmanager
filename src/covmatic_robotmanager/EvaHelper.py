@@ -9,7 +9,8 @@ class EvaHelper(Singleton):
     """ This is a singleton class that should help in interfacing
         with Eva robot.
     """
-    _logger = logging.getLogger(__name__)
+    _logger = logging.getLogger("robotmanager.evahelper")
+
     _eva = None
     _eva_lock_manager = None
 

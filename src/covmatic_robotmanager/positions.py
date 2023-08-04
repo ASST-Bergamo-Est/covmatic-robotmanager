@@ -7,7 +7,7 @@ import logging
 class Positions:
     def __init__(self,
                  positions_file_path: str,
-                 logger=logging.getLogger(__name__)):
+                 logger=logging.getLogger("robotmanager.positions")):
         self._logger = logger
         self._abs_path = os.path.abspath(positions_file_path)
         self._logger.info("Checking path {}...".format(self._abs_path))

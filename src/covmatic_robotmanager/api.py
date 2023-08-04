@@ -6,6 +6,8 @@ from flask_restful import Api, Resource
 from . import __version__
 from .robot_manager import RobotManager
 
+module_logger = logging.getLogger("robotmanager.api")
+
 
 class RobotManagerApi(Api):
     def __init__(self, *args, **kwargs):
@@ -16,7 +18,7 @@ class RobotManagerApi(Api):
         self.add_resource(RequestAction, '/action/<string:action>/<string:machine>/<string:slot>/<string:plate_name>', resource_class_args=(self._robot_manager,))
 
     def shutdown(self):
-        logging.getLogger().info("Api shutdown called")
+        module_logger.info("Api shutdown called")
         self._robot_manager.shutdown()
 
 

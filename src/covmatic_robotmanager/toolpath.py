@@ -124,7 +124,7 @@ class Toolpath:
 
 
 class ToolpathExecute:
-    def __init__(self, tp: Toolpath, logger=logging.getLogger(__name__)):
+    def __init__(self, tp: Toolpath, logger=logging.getLogger("robotmanager.toolpath")):
         self._eh = EvaHelper()
         self._tp = tp
         self._logger = logger

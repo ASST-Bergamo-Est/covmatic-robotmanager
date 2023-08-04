@@ -12,7 +12,7 @@ class RobotManagerException(Exception):
 
 
 class RobotManager(metaclass=SingletonMeta):
-    def __init__(self, logger=logging.getLogger(__name__), start_thread: bool = True):
+    def __init__(self, logger=logging.getLogger("robotmanager.robotmanager"), start_thread: bool = True):
         self._robot = Robot(eva_ip_address=Config().eva_ip,
                             token=Config().eva_token,
                             position_filepath=Config().positions_filepath)

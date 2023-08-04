@@ -8,7 +8,7 @@ GRIPPER_HAS_PLATE_HIGH_THRESHOLD = 5.0
 
 
 class EvaGripper:
-    def __init__(self, logger=logging.getLogger(__name__)):
+    def __init__(self, logger=logging.getLogger("robotmanager.evagripper")):
         self._eva = EvaHelper().eva
         self._logger = logger
 

@@ -11,7 +11,7 @@ from .singleton import SingletonMeta
 
 
 class Config(argparse.Namespace, metaclass=SingletonMeta):
-    _logger = logging.getLogger(__name__)
+    _logger = logging.getLogger("robotmanager.config")
 
     @classmethod
     def get_base_config_folder(cls):

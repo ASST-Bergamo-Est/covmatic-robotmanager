@@ -8,7 +8,7 @@ from .robot_manager import Robot
 import logging
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("robotmanager.calibrator")
 
 
 class _Getch:

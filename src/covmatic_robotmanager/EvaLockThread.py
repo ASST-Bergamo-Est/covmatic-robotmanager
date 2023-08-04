@@ -6,7 +6,7 @@ import threading
 
 
 class EvaLockThread(threading.Thread):
-    def __init__(self, eva: Eva, logger=logging.getLogger(__name__), *args, **kwargs):
+    def __init__(self, eva: Eva, logger=logging.getLogger("robotmanager.evalockthread"), *args, **kwargs):
         super(EvaLockThread, self).__init__(*args, **kwargs)
         self._eva = eva
         self._logger = logger
