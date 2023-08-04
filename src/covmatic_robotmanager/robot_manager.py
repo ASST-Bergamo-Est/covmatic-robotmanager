@@ -208,6 +208,6 @@ class RobotManager(metaclass=SingletonMeta):
                 self._logger.info("Found drop action to abort: {}".format(drop_action))
                 drop_action['state'] = 'aborted'
 
-        self._current_plate = "ERROR"
+        self._current_plate = None
 
 

@@ -145,14 +145,7 @@ class TestActionScheduler(TestRobotManager):
         self._rm.action_request(DROP_ACTION, MACHINE1, SLOT1, PLATE1)
         self._rm.action_scheduler()
 
-        assert self._rm._current_plate is None
-
-    def test_error_during_action_clear_states(self):
-        self._mock_robot().pick_up_plate.side_effect = RobotException("Test")
-        self._rm.action_request(PICK_ACTION, MACHINE1, SLOT1, PLATE1)
-        self._rm.action_request(DROP_ACTION, MACHINE1, SLOT1, PLATE1)
-        self._rm.action_scheduler()
-        self.assertIs(self._rm._current_plate, ERROR_PLATE_CODE)
+        self.assertIsNone(self._rm._current_plate)
 
 
 class TestPickDropSameMachine(TestRobotManager):
@@ -254,3 +247,9 @@ class TestPickError(TestRobotManager):
     def test_error_in_pick_return_aborted_for_drop(self):
         answer = self._rm.check_action(self._action_id_drop)
         self.assertIs(answer["state"], "aborted")
+
+    def test_error_in_pick_plate_is_reset(self):
+        self._rm.action_request(PICK_ACTION, MACHINE1, SLOT1, PLATE1)
+        self._rm.action_request(DROP_ACTION, MACHINE1, SLOT1, PLATE1)
+        self._rm.action_scheduler()
+        self.assertIsNone(self._rm._current_plate)
