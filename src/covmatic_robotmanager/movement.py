@@ -247,9 +247,7 @@ class Movement:
         tp.add_waypoint("pick_pos_up", self.get_joints(source_pos, offset={"z": source_raising_height}))
         tp.add_waypoint("pick_pos_near", self.get_joints(source_pos, offset={"z": near_height}))
         tp.add_waypoint("pick_pos", pick_pos)
-
-        if home_after:
-            tp.add_waypoint("home", self.get_joints("HOME"))
+        tp.add_waypoint("home", self.get_joints("HOME"))
 
         gripper.close()
 
@@ -282,7 +280,7 @@ class Movement:
             with ToolpathExecute(tp):
                 tp.add_movement("pick_pos_up")
                 tp.add_movement("pick_home", "linear")
-
+                tp.add_movement("home")
             raise MovementException("Plate not grabbed!")
 
         with ToolpathExecute(tp):
