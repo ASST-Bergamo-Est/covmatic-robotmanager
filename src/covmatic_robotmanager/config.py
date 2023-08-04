@@ -20,6 +20,12 @@ class Config(argparse.Namespace, metaclass=SingletonMeta):
         return config_dir
 
     @classmethod
+    def get_base_log_folder(cls):
+        log_dir = os.path.join(os.path.expanduser("~"), ".covmatic", "log")
+        cls.create_directory(log_dir)
+        return log_dir
+
+    @classmethod
     def get_config_file_path(cls) -> str:
         return os.path.join(cls.get_base_config_folder(), "robotmanager.conf")
 
@@ -39,6 +45,7 @@ class Config(argparse.Namespace, metaclass=SingletonMeta):
         parser.add_argument('--positions-filepath', metavar="path", type=str, default=cls.get_default_positions_file_path(), help="JSON File to save positions data")
         parser.add_argument('--test-only', dest="test_only", action="store_true", help="enable test-only execution")
         parser.add_argument('--debug-mode', dest="debug_mode", action="store_true", help="enable debug mode to show unhandled exceptions.")
+        parser.add_argument('-L', '--log-folder', dest="log_folder", type=str, default=cls.get_base_log_folder(), help="Folder to store logs in")
         return cls.reset(**parser.parse_known_args()[0].__dict__)
 
     @classmethod
