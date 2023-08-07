@@ -2,8 +2,8 @@ import logging
 import os
 import subprocess
 
-from src.covmatic_robotmanager.config import Config
-from src.covmatic_robotmanager.utils import FunctionCaseStartWith
+from .config import Config
+from .utils import FunctionCaseStartWith
 
 
 setup = FunctionCaseStartWith(os.sys.platform)
