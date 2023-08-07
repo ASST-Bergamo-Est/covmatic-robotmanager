@@ -1,5 +1,16 @@
 # Covmatic RobotManager
 
+## v0.0.4
+
+## Fixed
+- [server] do not home when pick and drop plate are inside same machine
+
+## Added
+- [server] Robot operation has *aborted* state in case of error during pick
+- [server] Abort drop operation if pick operation is aborted
+- [server] Home the robot when errors occours during operations
+- [server] Logs now are written to file also
+
 ## v0.0.3
 
 ### Fixed
