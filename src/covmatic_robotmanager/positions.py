@@ -13,7 +13,9 @@ class Positions:
         self._logger.info("Checking path {}...".format(self._abs_path))
 
         if not os.path.exists(self._abs_path):
-            raise Exception("Position file passed must exist: {}".format(self._abs_path))
+            self._logger.info("Position file not existing... Creating a new one.")
+            with open(self._abs_path, "w") as fp:
+                json.dump(dict(), fp)
 
         with open(self._abs_path, "r") as fp:
             self._positions = json.load(fp)
