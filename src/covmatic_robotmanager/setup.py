@@ -12,10 +12,15 @@ setup = FunctionCaseStartWith(os.sys.platform)
 @setup.case('linux')
 def linux_setup():
     template_dir = os.path.join(os.path.dirname(__file__), "templates")
-    if Config.get_desktop_file_path():
-        with open(Config.get_desktop_file_path(), "w") as df:
+    file_path = Config.get_desktop_file_path()
+    if file_path:
+        directory_path = os.path.split(file_path)[0]
+        if not os.path.exists(directory_path):
+            logging.getLogger().info("Creating directory {}".format(directory_path))
+            os.makedirs(directory_path)
+        with open(file_path, "w") as df:
             with open(os.path.join(template_dir, "covmatic.desktop"), "r") as tf:
-                df.write(tf.read().format(os.path.join(template_dir, "Covmatic_Icon.ico")))
+                df.write(tf.read().format(os.path.join(template_dir, "Covmatic-robotmanager_Icon.png")))
     else:
         logging.getLogger().warning("No desktop file specified, skipping")
 
