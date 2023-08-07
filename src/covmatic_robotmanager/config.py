@@ -53,6 +53,10 @@ class Config(argparse.Namespace, metaclass=SingletonMeta):
         return os.path.join(cls.get_base_config_folder(), "positions.json")
 
     @classmethod
+    def get_desktop_file_path(cls) -> str:
+        return desktop_file()
+
+    @classmethod
     def parse(cls, description):
         cls._logger.info("Checking for arguments in config file {}".format(cls.get_config_file_path()))
         parser = configargparse.ArgParser(description=description,
@@ -65,8 +69,6 @@ class Config(argparse.Namespace, metaclass=SingletonMeta):
         parser.add_argument('--test-only', dest="test_only", action="store_true", help="enable test-only execution")
         parser.add_argument('--debug-mode', dest="debug_mode", action="store_true", help="enable debug mode to show unhandled exceptions.")
         parser.add_argument('-L', '--log-folder', dest="log_folder", type=str, default=cls.get_base_log_folder(), help="Folder to store logs in")
-        parser.add_argument('--desktop-file', metavar='path', type=str, default=desktop_file(), help="(setup) the desktop file path for the GUI")
-
         return cls.reset(**parser.parse_known_args()[0].__dict__)
 
     @classmethod

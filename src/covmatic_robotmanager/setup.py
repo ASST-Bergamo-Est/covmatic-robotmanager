@@ -5,7 +5,6 @@ import subprocess
 from src.covmatic_robotmanager.config import Config
 from src.covmatic_robotmanager.utils import FunctionCaseStartWith
 
-Config.pull(__doc__)
 
 setup = FunctionCaseStartWith(os.sys.platform)
 
@@ -13,8 +12,8 @@ setup = FunctionCaseStartWith(os.sys.platform)
 @setup.case('linux')
 def linux_setup():
     template_dir = os.path.join(os.path.dirname(__file__), "templates")
-    if Config().desktop_file:
-        with open(Config().desktop_file, "w") as df:
+    if Config.get_desktop_file_path():
+        with open(Config.get_desktop_file_path(), "w") as df:
             with open(os.path.join(template_dir, "covmatic.desktop"), "r") as tf:
                 df.write(tf.read().format(os.path.join(template_dir, "Covmatic_Icon.ico")))
     else:
@@ -31,11 +30,9 @@ def linux_setup():
 def win_setup():
     import winshell
 
-    print(Config().__dict__)
-
     template_dir = os.path.join(os.path.dirname(__file__), "templates")
-    if Config().desktop_file:
-        with winshell.shortcut(Config().desktop_file) as link:
+    if Config.get_desktop_file_path():
+        with winshell.shortcut(Config.get_desktop_file_path()) as link:
             link.path = os.sys.executable
             link.arguments = "-m covmatic_robotmanager.main"
             link.description = "Covmatic Robotmanager server"
