@@ -256,11 +256,13 @@ def main_loop():
     robot = Robot(Config().eva_ip, Config().eva_token, Config().positions_filepath, calibration=True, logger=logger)
     owner = input("Insert name of target robot: ")
 
-    pos_name = input("Insert name of position for robot {}: ".format(owner))
+    if owner == "HOME":
+        pos_name = "HOME"
+    else:
+        slot_name = input("Insert name of slot for robot {}: ".format(owner))
+        check_default_positions_exist_for_owner(robot, owner, slot_name)
+        pos_name = "{}-{}".format(owner, slot_name)
 
-    check_default_positions_exist_for_owner(robot, owner, pos_name)
-
-    pos_name = "{}-{}".format(owner, pos_name)
     print("Actual position {}".format(pos_name))
 
     with robot._eva_helper.eva.lock():
