@@ -8,6 +8,25 @@ import configargparse
 import os
 import logging
 from .singleton import SingletonMeta
+from .utils import FunctionCaseStartWith
+
+
+desktop_file = FunctionCaseStartWith(os.sys.platform)
+
+@desktop_file.case('linux')
+def desktop_file_linux():
+    return os.path.expanduser("~/.local/share/applications/covmatic-robotmanager.desktop")
+
+
+@desktop_file.case(('win32', 'cygwin'))
+def desktop_file_win():
+    import winshell
+    return os.path.join(winshell.desktop(), "Covmatic Robotmanager server.lnk")
+
+
+@desktop_file.case('')  # all other
+def desktop_file_other():
+    return ""
 
 
 class Config(argparse.Namespace, metaclass=SingletonMeta):
@@ -46,6 +65,8 @@ class Config(argparse.Namespace, metaclass=SingletonMeta):
         parser.add_argument('--test-only', dest="test_only", action="store_true", help="enable test-only execution")
         parser.add_argument('--debug-mode', dest="debug_mode", action="store_true", help="enable debug mode to show unhandled exceptions.")
         parser.add_argument('-L', '--log-folder', dest="log_folder", type=str, default=cls.get_base_log_folder(), help="Folder to store logs in")
+        parser.add_argument('--desktop-file', metavar='path', type=str, default=desktop_file(), help="(setup) the desktop file path for the GUI")
+
         return cls.reset(**parser.parse_known_args()[0].__dict__)
 
     @classmethod

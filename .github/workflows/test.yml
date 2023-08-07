@@ -65,6 +65,9 @@ jobs:
       - name: Install package
         run: pip install .
 
+      - name: Desktop shorcut setup
+        run: py -m covmatic_robotmanger.setup
+
       - name: Execute script ${{ matrix.script }}
         run: ${{ matrix.script }} --test-only --eva-ip "TEST" --eva-token "TEST"
 

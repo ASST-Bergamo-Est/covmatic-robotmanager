@@ -22,7 +22,9 @@ dependencies = [
     "evasdk",
     "flask",
     "flask-restful",
-    "waitress"
+    "waitress",
+    "winshell; platform_system == 'Windows'",
+    "pywin32; platform_system == 'Windows'"
 ]
 
 [project-urls]

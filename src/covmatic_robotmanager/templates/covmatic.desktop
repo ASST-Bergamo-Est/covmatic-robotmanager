@@ -1,0 +1,10 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Name=Robotmanager Server
+Comment=Covmatic Robotmanager server
+Terminal=true
+Type=Application
+Exec=robotmanager-server
+Icon={}
+Categories=Development;
