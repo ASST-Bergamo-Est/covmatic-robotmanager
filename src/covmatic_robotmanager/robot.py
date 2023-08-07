@@ -20,11 +20,12 @@ class RobotException(Exception):
 
 
 class Robot:
-    def __init__(self, eva_ip_address, token, position_filepath, logger=logging.getLogger("robotmanager.robot")):
+    def __init__(self, eva_ip_address, token, position_filepath,
+                 calibration: bool = False, logger=logging.getLogger("robotmanager.robot")):
         self._logger = logger
         self._eva_helper = EvaHelper()
         self._eva_helper.connect(eva_ip_address, token)
-        self._movement = Movement(position_filepath)
+        self._movement = Movement(position_filepath, calibration=calibration)
 
     def unlock(self):
         self._eva_helper.disconnect()

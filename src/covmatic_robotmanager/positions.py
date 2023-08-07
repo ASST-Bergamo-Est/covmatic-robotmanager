@@ -7,15 +7,19 @@ import logging
 class Positions:
     def __init__(self,
                  positions_file_path: str,
+                 create_file: bool = False,
                  logger=logging.getLogger("robotmanager.positions")):
         self._logger = logger
         self._abs_path = os.path.abspath(positions_file_path)
         self._logger.info("Checking path {}...".format(self._abs_path))
 
         if not os.path.exists(self._abs_path):
-            self._logger.info("Position file not existing... Creating a new one.")
-            with open(self._abs_path, "w") as fp:
-                json.dump(dict(), fp)
+            if create_file:
+                self._logger.info("Position file not existing... Creating a new one.")
+                with open(self._abs_path, "w") as fp:
+                    json.dump(dict(), fp)
+            else:
+                raise Exception("Position file passed must exist: {}".format(self._abs_path))
 
         with open(self._abs_path, "r") as fp:
             self._positions = json.load(fp)
