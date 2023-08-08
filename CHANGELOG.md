@@ -1,5 +1,14 @@
 # Covmatic RobotManager
 
+## v0.0.5
+
+## Fixed
+- [calibrator] main *HOME* position can be saved directly.
+- [calibrator] create *positions.json* file if not found.
+
+## Added
+- [setup] Setup module for creation of desktop link to start *robotmanager-server*
+
 ## v0.0.4
 
 ## Fixed
