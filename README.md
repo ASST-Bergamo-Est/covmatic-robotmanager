@@ -52,7 +52,7 @@ below, but instead you should locate the script installation directory to launch
 
 Robotmanager-server uses pre-calibrated positions in order to know where to position the robot.
 
-All the position are stored in a .covmatic/positions.json* file in your home directory.
+All the position are stored in a *.covmatic/positions.json* file in your home directory.
 
 The data organization has these objects:
 - a main **HOME** position which is the general home where the robot should stay waiting for operations and where it will return after each operation.
@@ -79,7 +79,7 @@ The calibration flow should be as follows:
          Eva should move freely between *HOME*s positions.
    2. **DECK** is a position where the gripper touches the deck of the target robot.
       This value is used to calculate heights of labware.
-   3. **HMAX** is the maximum height reachable, calibrated with the Eva arm in the highest possibile position.ù
+   3. **HMAX** is the maximum height reachable, calibrated with the Eva arm in the highest possibile position.
    
    To calibrate a position in a target robot you need to follow this sequence for each position:
    1. launch the *robotmanager-calibrator* script
@@ -96,8 +96,8 @@ The Eva will use this data to calculate and execute a safe trajectory to pick up
 
 ## Execution
 
-Covmatic Robotmanager API will listen for request from ***covmatic-robotstation*** package running on each target robot.
+Covmatic Robotmanager server will listen for request from ***covmatic-robotstation*** package running on each target robot.
 When a *pick* and *drop* or a *transfer* action are queued for a same plate name then the EVA robot will execute the plate transfer.
 
-In case of error (e.g. plate not grabbed) both every action related to that plate will be aborted.
+In case of error (e.g. plate not grabbed) every action related to that plate will be aborted.
 
