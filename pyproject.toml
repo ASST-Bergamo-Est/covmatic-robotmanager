@@ -8,12 +8,14 @@ authors = [
     { name="Agostino Facotti", email="agostino.facotti@asst-bergamoest.it"},
 ]
 description = "Covmatic Robot Manager is a robotic arm manager for action requested by other robots"
+keywords = ["automation", "lab", "biology", "robotics"]
 readme = "README.md"
 requires-python = ">=3.7"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta"
 ]
 dynamic = ["version"]
 
@@ -27,8 +29,9 @@ dependencies = [
     "pywin32; platform_system == 'Windows'"
 ]
 
-[project-urls]
-"Homepage" = "https://github.com/ASST-Bergamo-Est/covmatic-robotmanager"
+[project.urls]
+Homepage = "https://github.com/ASST-Bergamo-Est/covmatic-robotmanager"
+"Source Code" = "https://github.com/ASST-Bergamo-Est/covmatic-robotmanager"
 
 [tool.hatch.version]
 path = "src/covmatic_robotmanager/__init__.py"
