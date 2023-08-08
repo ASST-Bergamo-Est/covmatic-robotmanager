@@ -11,6 +11,7 @@ This is part of a project in development.**
 * [Setup](#setup)
 * [Calibration](#calibration)
 * [Execution](#execution)
+* [Testing](#testing)
 
 ## Introduction
 
@@ -101,3 +102,11 @@ When a *pick* and *drop* or a *transfer* action are queued for a same plate name
 
 In case of error (e.g. plate not grabbed) every action related to that plate will be aborted.
 
+## Testing
+
+The Covmatic Robotmanager comes with a handful of tests to check that the code is doing as expected. 
+It has been developed using a Test Driven Development approach.
+To execute tests and coverage report just launch:
+```
+hatch run cov
+```
