@@ -116,7 +116,7 @@ class RobotManager(metaclass=SingletonMeta):
                 self.execute_action(a)
 
                 self._logger.info("Removing action {} from list".format(a))
-                self.remove_action(a)
+                self.mark_action_as_finished(a)
 
             except Exception as e:
                 self._logger.error("handling error {}".format(e))
@@ -138,9 +138,9 @@ class RobotManager(metaclass=SingletonMeta):
         except RobotException as e:
             raise RobotManagerException("Error during robot action: {}".format(e))
 
-    def remove_action(self, action):
+    def mark_action_as_finished(self, action):
         with self._actions_lock:
-            self._actions.remove(action)
+            action["state"] = "finished"
 
     def action_processor_thread(self):
         self._logger.info("APT Entered action processor thread")
@@ -157,10 +157,7 @@ class RobotManager(metaclass=SingletonMeta):
     def check_action(self, action_id):
         self._logger.info("Checking action id {}".format(action_id))
 
-        if self._is_action_finished(action_id):
-            state = "finished"
-        else:
-            state = self._action_get_state(action_id)
+        state = self._action_get_state(action_id)
 
         self._logger.info("Action id {} state {}".format(action_id, state))
         return {"state": state}
@@ -183,15 +180,6 @@ class RobotManager(metaclass=SingletonMeta):
         self._logger.debug("action id {} state {}".format(action_id, state))
         self._logger.debug("Action get state actions are: {}".format(self._actions))
         return state
-
-    def _is_action_finished(self, action_id):
-        """ Check the actions array to know if the action id passed is finished """
-        try:
-            self._get_action_with_id(action_id)
-            return False
-        except RobotManagerException as e:
-            self._logger.info("Is action id {} finished got expecter error: {}".format(action_id, e))
-            return True
 
     def handle_error(self, a):
         """ This function will set the 'aborted' state on the passed action;

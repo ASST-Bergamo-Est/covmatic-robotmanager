@@ -112,20 +112,20 @@ class TestActionScheduler(TestRobotManager):
 
         assert self._rm._current_plate is None
 
-    def test_both_done_action_are_deleted(self):
+    def test_both_done_action_are_set_as_finished(self):
         self._rm.action_request(PICK_ACTION, MACHINE1, SLOT1, PLATE1)
         self._rm.action_request(DROP_ACTION, MACHINE1, SLOT1, PLATE1)
         self._rm.action_scheduler()
 
-        self.assertEqual(0, len(self._rm._actions))
+        self.assertEqual(0, len(self._rm._pending_actions))
 
-    def test_undone_action_is_present(self):
+    def test_pending_action_is_present(self):
         self._rm.action_request(PICK_ACTION, MACHINE1, SLOT1, PLATE1)
         self._rm.action_request(DROP_ACTION, MACHINE1, SLOT1, PLATE1)
         self._rm.action_request(PICK_ACTION, MACHINE2, SLOT1, PLATE1)
         self._rm.action_scheduler()
 
-        self.assertEqual(1, len(self._rm._actions))
+        self.assertEqual(1, len(self._rm._pending_actions))
 
     def test_pick_different_plate_stay_queued(self):
         self._rm.action_request(PICK_ACTION, MACHINE1, SLOT1, PLATE1)
@@ -135,7 +135,7 @@ class TestActionScheduler(TestRobotManager):
         self._rm.action_request(DROP_ACTION, MACHINE1, SLOT1, PLATE1)
         self._rm.action_scheduler()
 
-        self.assertEqual(1, len(self._rm._actions))
+        self.assertEqual(1, len(self._rm._pending_actions))
 
     def test_pick_different_plate_plate_not_modified(self):
         self._rm.action_request(PICK_ACTION, MACHINE1, SLOT1, PLATE1)
