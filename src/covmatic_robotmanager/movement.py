@@ -252,6 +252,19 @@ class Movement:
         tp.add_waypoint("pick_pos", pick_pos)
         tp.add_waypoint("home", self.get_joints("HOME"))
 
+        def check_gripper_has_plate(starting_waypoint_name):
+            if not gripper.has_plate():
+                gripper.open()
+                with ToolpathExecute(tp):
+                    tp.add_movement(starting_waypoint_name)
+                    tp.add_movement("pick_pos_up", "linear", max_speed=approach_speed)
+                gripper.close()
+                with ToolpathExecute(tp):
+                    tp.add_movement("pick_pos_up")
+                    tp.add_movement("pick_home", "linear")
+                    tp.add_movement("home")
+                raise MovementException("Plate not grabbed!")
+
         gripper.close()
 
         with ToolpathExecute(tp):
@@ -267,6 +280,8 @@ class Movement:
 
         gripper.close()
 
+        check_gripper_has_plate("pick_pos")
+
         with ToolpathExecute(tp):
             if detach_plate:
                 self.toolpath_raise_and_detach(tp, pick_pos, 0.003, 0.001, max_speed=approach_speed)
@@ -274,17 +289,7 @@ class Movement:
                 tp.add_movement("pick_pos")
             tp.add_movement("pick_pos_near", "linear", max_speed=approach_speed)
 
-        if not gripper.has_plate():
-            gripper.open()
-            with ToolpathExecute(tp):
-                tp.add_movement("pick_pos_near", )
-                tp.add_movement("pick_pos_up", "linear", max_speed=approach_speed)
-            gripper.close()
-            with ToolpathExecute(tp):
-                tp.add_movement("pick_pos_up")
-                tp.add_movement("pick_home", "linear")
-                tp.add_movement("home")
-            raise MovementException("Plate not grabbed!")
+        check_gripper_has_plate("pick_pos_near")
 
         with ToolpathExecute(tp):
             tp.add_movement("pick_pos_near")
