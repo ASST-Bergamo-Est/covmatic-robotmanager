@@ -1,5 +1,10 @@
 # Covmatic RobotManager
 
+## v0.0.6
+
+- [server] Fixed bug happening when scheduler run in the middle of a check action operation.
+
+
 ## v0.0.5
 
 ## Fixed

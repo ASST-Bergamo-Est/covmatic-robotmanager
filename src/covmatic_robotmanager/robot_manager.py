@@ -197,5 +197,3 @@ class RobotManager(metaclass=SingletonMeta):
                 drop_action['state'] = 'aborted'
 
         self._current_plate = None
-
-
