@@ -1,9 +1,14 @@
 # RobotManager
 Manager code for EVA robot from Automata.
 
-## Warning
-**This is a development program and not ready for production-use.
-This is part of a project in development.**
+> [!WARNING]
+> This is a development program and not ready for production-use.
+> This is part of a project in development.**
+
+> [!IMPORTANT]
+> This package is part of an integrated system. You can find the full documentation
+> of the system here: https://asst-bergamo-est.github.io/covmatic-covidseq-guide/
+
 
 ## Table of Contents
 * [Introduction](#introduction)
@@ -26,7 +31,7 @@ Source code is on [ASST Bergamo Est repository](https://github.com/ASST-Bergamo-
 
 ## Installation
 
-You can [install the Covmatic LocalWebServer via `pip`](https://pypi.org/project/covmatic-robotmanager):
+You can [install the Covmatic Robotmanager via `pip`](https://pypi.org/project/covmatic-robotmanager):
 ```
 <python> -m pip install covmatic-robotmanager
 ```
