@@ -11,7 +11,9 @@ This is part of a project in development.**
 * [Setup](#setup)
 * [Calibration](#calibration)
 * [Execution](#execution)
+* [Development](#development)
 * [Testing](#testing)
+* [Publish](#publish)
 
 ## Introduction
 
@@ -102,6 +104,25 @@ When a *pick* and *drop* or a *transfer* action are queued for a same plate name
 
 In case of error (e.g. plate not grabbed) every action related to that plate will be aborted.
 
+
+## Development
+
+If you want to develop the package follow these step:
+1. check out the source code:
+   ```
+   git checkout https://github.com/ASST-Bergamo-Est/covmatic-robotmanager.git
+   ```
+2. modify the code and update the version in *src/covmatic_robotmanager/__init__.py*
+3. build the code:
+   ```
+   hatch build
+   ```
+4. install locally with:
+   ```
+   pip install .
+   ```
+   or use the wheel created in the *dist* folder.
+
 ## Testing
 
 The Covmatic Robotmanager comes with a handful of tests to check that the code is doing as expected. 
@@ -110,3 +131,17 @@ To execute tests and coverage report just launch:
 ```
 hatch run cov
 ```
+
+## Publish
+
+To publish a new version of the package be sure the package is satisfying the testing step;
+then use *git* to add and commit everything.
+The last step is to create a tag for version *x.y.x* with:
+   ```
+   git tag vx.y.x
+   ```
+and to commit the tag with: 
+   ```
+   git push origin tag vx.y.x
+   ```
+The *GitHub workflow* will then build the package, check for installation and unit testing and then upload the wheel on *PyPI*.
